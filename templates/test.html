@@ -6,19 +6,20 @@
       $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
       answer = 0;
       setInterval(function() {
+        document.body.onkeyup = function(e){
+          if(e.keyCode == 32){
+            answer=1;
+          }
+        }
         $.getJSON($SCRIPT_ROOT + '/img_url', {answer: answer}, function(data) {
           answer = 0;
-          setTimeout(() => {
-            document.getElementById('image').src = data.url;
-          }, 800);
+          document.getElementById('image').src = data.url;
+          
           $("#answer").text(data.answer);
-
-          document.getElementById('image').src = null;
+          
+          setTimeout(() => {
+            document.getElementById('image').src = null;
+          }, 600);
           });
-          document.body.onkeyup = function(e){
-            if(e.keyCode == 32){
-              answer=1;
-            }
-          }
         }, 1400);
     </script>
