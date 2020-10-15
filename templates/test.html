@@ -71,27 +71,32 @@
     
     </style>
   </head>
-<h1><p>Please press <kbd>Space</kbd> to mark this image as "Seen".</p>
+<h1><p id="tips1">Please press <kbd>Space</kbd> to mark this image as "Seen".</p>
     <p id="countdown">The memory game will start in 5 seconds.</p>
    <img id="image" src = "static/blank.png" style="width:400px">
 </h1>
-   <h2><p>Some thing wrong? Click here <button type="submit">Retart the game.</button> </p></h2>
+<h2 id="tips2">Press <kbd>s</kbd> to end the game and save your progress. </h2>
+<h2 id="tips3">Some thing wrong? Press <kbd>ESC</kbd> to retart the game. </h2>
 
    <script src="static/js/jquery-3.5.1.min.js"></script>
     <script type=text/javascript>
       $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
       answer = 0;
-      start_count = 5;
-      var x = setInterval(function() {
-        start_count--;
-        document.getElementById("countdown").innerHTML = "The memory game will start in " + start_count + " seconds.";
-        if (start_count <= 0) {
-            clearInterval(x);
-            document.getElementById("countdown").innerHTML = "The memory game has started.";
-        }
-      }, 1000);
-      setTimeout(() => {
-        setInterval(function() {
+
+      var reset = function() {
+        start_count = 5;
+        var x = setInterval(function() {
+          start_count--;
+          document.getElementById("countdown").innerHTML = "The memory game will start in " + start_count + " seconds.";
+          if (start_count <= 0) {
+              clearInterval(x);
+              document.getElementById("countdown").innerHTML = "The memory game has started.";
+          }
+        }, 1000);
+      }
+
+      var game_start = function() {
+        var y = setInterval(function() {
           $.getJSON($SCRIPT_ROOT + '/img_url', {answer: answer}, function(data) {
             answer = 0;
             document.body.style.backgroundColor = "#ffffff";
@@ -106,7 +111,23 @@
                 answer=1;
                 document.body.style.backgroundColor = "#C1C1C1";
               }
+              if (e.keyCode==27){
+                answer = 2;
+                setTimeout(() => {game_start();}, 5000);
+                reset();
+                clearInterval(y);
+              }
+              if (e.keyCode==83){
+                document.getElementById("countdown").innerHTML = "Game ended and all your progress has been saved!";
+                document.getElementById("tips1").innerHTML = "";
+                document.getElementById("tips2").innerHTML = "Press <kbd>c</kbd> to continue the game.";
+                document.getElementById("tips3").innerHTML = "";
+                clearInterval(y);
+              }
             }
           }, 1400);
-      }, 5000);
+      }
+      reset();
+      setTimeout(() => {game_start();}, 5000);
+      
     </script>
