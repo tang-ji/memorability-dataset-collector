@@ -1,24 +1,112 @@
-   <p>Please press <kbd>Space</kbd> to mark this image as "Seen".</p>
-   <img id="image" style="width:400px">
-  <p id="answer"></p>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Start</title>
+    <style type="text/css">
+      *{margin: 0;
+        padding: 0; 
+      }
+      body{color:black; text-align: center;}
+      .context{background: #fcb321;
+      position: center;
+      left: 0;
+      top:50%;
+      width: 100%;
+      height: 800px;
+      margin-top: -350px;
+      overflow: hidden;
+      }
+      .container{
+        max-width: 600px;
+        height: 400px;
+        padding: 80px 0;
+        text-align: center;
+        margin: 0 auto;
+      }
+      .container h1{
+        font-size: 40px;
+          font-weight: 300;}
+        form{padding: 20px 0;}
+        form input{border: 1px solid #FFF;
+        width: 220px;
+        padding: 10px 15px;
+        display: block;
+        margin: 0 auto 10px auto;
+        border-radius: 30px;
+        font-size: 18px;
+        font-weight: 300;
+        text-align: center;
+      }
+      .container h2{
+        font-size: 20px;
+        font-weight: 150;
+        font-family: consolas;
+      }
+      form button{
+        background: black;
+        border: 0;
+        padding: 10px 15px;
+        color: white;
+        border-radius: 8px;
+        width: 400px;
+        font-size: 20px;
+      }
+      form button:hover{
+        background:#CCC;
+      }
+      kbd {
+        background-color: #eee;
+        border-radius: 3px;
+        border: 1px solid #b4b4b4;
+        box-shadow: 0 1px 1px rgba(0,0,0,.2), 0 2px 0 0 rgba(255,255,255,.7) inset;
+        color: #333;
+        display: inline-block;
+        font-family: consolas,"Liberation Mono",courier,monospace;
+        font-size: .85em;
+        font-weight: 700;
+        line-height: 1;
+        padding: 2px 4px;
+        white-space: nowrap;
+      }
+    
+    </style>
+  </head>
+<h1><p>Please press <kbd>Space</kbd> to mark this image as "Seen".</p>
+    <p id="countdown">The memory game will start in 5 seconds.</p>
+   <img id="image" src = "static/blank.png" style="width:400px">
+</h1>
+   <h2><p>Some thing wrong? Click here <button type="submit">Retart the game.</button> </p></h2>
+
    <script src="static/js/jquery-3.5.1.min.js"></script>
     <script type=text/javascript>
       $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
       answer = 0;
-      setInterval(function() {
-        $.getJSON($SCRIPT_ROOT + '/img_url', {answer: answer}, function(data) {
-          answer = 0;
-          setTimeout(() => {
+      start_count = 5;
+      var x = setInterval(function() {
+        start_count--;
+        document.getElementById("countdown").innerHTML = "The memory game will start in " + start_count + " seconds.";
+        if (start_count <= 0) {
+            clearInterval(x);
+            document.getElementById("countdown").innerHTML = "The memory game has started.";
+        }
+      }, 1000);
+      setTimeout(() => {
+        setInterval(function() {
+          $.getJSON($SCRIPT_ROOT + '/img_url', {answer: answer}, function(data) {
+            answer = 0;
+            document.body.style.backgroundColor = "#ffffff";
             document.getElementById('image').src = data.url;
-          }, 800);
-          $("#answer").text(data.answer);
-
-          document.getElementById('image').src = null;
-          });
-          document.body.onkeyup = function(e){
-            if(e.keyCode == 32){
-              answer=1;
+            
+            setTimeout(() => {
+              document.getElementById('image').src = "static/blank.png";
+            }, 600);
+            });
+            document.body.onkeyup = function(e){
+              if(e.keyCode == 32){
+                answer=1;
+                document.body.style.backgroundColor = "#C1C1C1";
+              }
             }
-          }
-        }, 1400);
+          }, 1400);
+      }, 5000);
     </script>
