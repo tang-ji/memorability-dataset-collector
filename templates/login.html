@@ -4,8 +4,11 @@
 		<meta charset="UTF-8">
 		<title>Start</title>
 		<style type="text/css">
-			body{color:black}
-			.context{background: #ffe577;
+			*{margin: 0;
+			  padding: 0; 
+			}
+			body{color:white}
+			.context{background: #fcb321;
 			position: absolute;
 			left: 0;
 			top:50%;
@@ -35,11 +38,6 @@
 				font-weight: 300;
 				text-align: center;
 			}
-			.container h2{
-		        font-size: 20px;
-		        font-weight: 150;
-		        font-family: consolas;
-		    }
 			form button{
 				background: black;
 				border: 0;
@@ -56,17 +54,14 @@
 		</style>
 	</head>
 	<body>
-		<script src="static/js/jquery-3.5.1.min.js"></script>
 		<form action="/login" method="POST">
 		<div class="context">
 			<div class="container">
-				<h1><img src="static/accenture-interactive.png" width="400"></h1>
-				<h1><p>Image Memory Game</p></h1>
+				<h1><img src="static/accenture.jpg" width="400"></h1>
 				<form action="" method="get">
-					<input type="text"  name="username" placeholder="Nick Name"/>
+					<input type="text"  name="username" placeholder="Name"/>
 					<button type="submit">Start</button>		
 				</form>
-				<h2><p>Please make sure you use the same Nick Name for all the games.</p></h2>
 			</div>
 		</div>	
 		</form>
