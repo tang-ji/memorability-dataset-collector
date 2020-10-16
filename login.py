@@ -1,4 +1,4 @@
-from flask import Flask, flash, redirect, render_template, request, session, abort, jsonify
+from flask import Flask, flash, redirect, render_template, request, session, abort, jsonify, make_response
 import os
 from glob import glob
 
@@ -34,6 +34,10 @@ def home():
         return render_template('login.html')
     else:
         urls = server_class.get_all()
+        response = make_response(render_template('test.html', labels=urls))
+        response.headers['Cache-Control'] = 'public'
+        response.headers['Expires'] = '300'
+        # return response
         return render_template('test.html', labels=urls)
 
 @app.route('/img_url')
@@ -59,6 +63,7 @@ def logout():
     reset()
     session['logged_in'] = False
     return home()
+
 
 if __name__ == "__main__":
     server_class = server("static/imgs")
