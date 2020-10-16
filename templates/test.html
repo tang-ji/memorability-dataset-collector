@@ -1,16 +1,14 @@
+<!DOCTYPE html>
 <html>
   <head>
     <meta charset="UTF-8">
-    <title>Start</title>
+    <title>Game</title>
     <style type="text/css">
-      *{margin: 0;
-        padding: 0; 
-      }
       head{color:black; text-align: right;}
       .container h3{
         font-size: 14px;
         font-weight: 150;
-        text-align: right;
+        text-align: center;
       }
       form button{
         background: black;
@@ -24,22 +22,67 @@
       form button:hover{
         background:#CCC;
       }
-      body{color:black; text-align: center;}
-      .context{background: #fcb321;
+      body{color:black; text-align: center; background: #ffe577;}
+      .context{
       position: center;
       left: 0;
       top:50%;
       width: 100%;
-      height: 800px;
-      margin-top: -350px;
+      height: 700px;
+      margin-top: 0px;
       overflow: hidden;
+      }
+      .modal-header {
+        padding: 2px 16px;
+        background-color: #ffe8a7;
+        color: white;
+      }
+      .modal-body {padding: 2px 16px;}
+      /* Modal Footer */
+      .modal-footer {
+        padding: 2px 16px;
+        background-color: #5cb85c;
+        color: white;
+      }
+      .modal {
+        display: none; /* Hidden by default */
+        position: fixed; /* Stay in place */
+        z-index: 1; /* Sit on top */
+        left: 0;
+        top: 0;
+        width: 100%; /* Full width */
+        height: 100%; /* Full height */
+        overflow: auto; /* Enable scroll if needed */
+        background-color: rgb(0,0,0); /* Fallback color */
+        background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+      }
+      .modal-content {
+        position: relative;
+        background-color: #fefefe;
+        margin: auto;
+        padding: 0;
+        border: 1px solid #888;
+        width: 50%;
+        box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
+        animation-name: animatetop;
+        animation-duration: 0.4s
+      }
+      /* Add Animation */
+      @keyframes animatetop {
+        from {top: -300px; opacity: 0}
+        to {top: 0; opacity: 1}
       }
       .container{
         max-width: 600px;
         height: 400px;
-        padding: 80px 0;
+        padding: 0px 0;
         text-align: center;
         margin: 0 auto;
+      }
+      .img{
+        width: 600px;
+        height: 600px;
+        text-align: center;
       }
       .container h1{
         font-size: 18px;
@@ -47,6 +90,12 @@
       .container h2{
         font-size: 18px;
         font-weight: 150;
+        font-family: consolas;
+      }
+      .container h4{
+        font-size: 18px;
+        font-weight: 150;
+        text-align: left;
         font-family: consolas;
       }
       kbd {
@@ -63,28 +112,76 @@
         padding: 2px 4px;
         white-space: nowrap;
       }
+      .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+      }
+
+      .close:hover,
+      .close:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+      }
     
     </style>
-    <form action="/logout" method="POST">
-      <h3>It's not you?<button type="submit">Log Out</button></h3> 
-    </form>
   </head>
-<h1><p id="tips1">Please press <kbd>Space</kbd> to mark this image as "Seen".</p>
-    <p id="countdown">Images pre-downloading...</p>
-</h1>
-<h3><label id="progree_count">Image remained: 198</label>
-  <progress id="progress" value="0" max="198"></progress>
-</h3>
-   <img id="image" src = "static/blank.png" style="width:400px">
-
-<h2 id="tips2">Press <kbd>s</kbd> to end the game and save your progress. </h2>
-<h2 id="tips3">Some thing wrong? Press <kbd>ESC</kbd> to retart the game. </h2>
-
-   <script src="static/js/jquery-3.5.1.min.js"></script>
+<body>
+    <script src="static/js/jquery-3.5.1.min.js"></script>
+    <div class="context">
+        <div class="container">
+          <form action="/logout" method="POST">
+            <h3><label id="welcome"></label> Press <kbd>H</kbd> for help. It's not you?<button type="submit">Log Out</button></h3> 
+          <div id="myModal" class="modal">
+            <div class="modal-content">
+              <div class="modal-header">
+                <span class="close">&times;</span>
+                <h2>shortcut key</h2>
+              </div>
+              <div class="modal-body">
+                <h4 id="tips1"><kbd>Space</kbd> mark current image as "seen".</h4>
+                  <h4 id="tips2"><kbd>S</kbd> start the game. </h4>
+                  <h4 id="tips2"><kbd>P</kbd> pause the game. </h4>
+                  <h4 id="tips3"><kbd>ESC</kbd> retart the game. </h4>
+                  <h4 id="tips3"><kbd>H</kbd> for help. </h4>
+              </div>
+            </div>
+          </div>
+            <h1><p id="countdown">Images pre-downloading...</p></h1>
+            <h3><label id="progree_count">Image remained: 198</label>
+              <progress id="progress" value="0" max="198"></progress>
+            </h3>
+            <div class="img">
+              <img id="image" style="width:600px; align-self:center">
+            </div>
+        </div>
+    </div>  
+</body>
+   
     <script type=text/javascript>
       $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
-      answer = 0;
+      var modal = document.getElementById("myModal");
+      var span = document.getElementsByClassName("close")[0];
+      var labels = {{labels | tojson}};
+      var img_urls = labels.slice(0, labels.length);
+      var welcome = labels[labels.length-1];
+      document.getElementById("welcome").innerHTML = welcome;
+      modal.style.display = "block";
+      // When the user clicks on <span> (x), close the modal
+      span.onclick = function() {
+        modal.style.display = "none";
+      }
 
+      // When the user clicks anywhere outside of the modal, close it
+      window.onclick = function(event) {
+        if (event.target == modal) {
+          modal.style.display = "none";
+        }
+      }
+
+      answer = 0;
       class Temp {
         addImageProcess(src){
           return new Promise((resolve, reject) => {
@@ -97,76 +194,75 @@
       }
       
       let tmp = new Temp();
-      var image_blank = new Image();
-      image_blank.src = "static/blank.png";
 
-      // var images = new Array();
-      // let load_img = async function(img_urls, i) {
-      //   images[i] = new Image();
-      //   images[i].src = img_urls[i];
-      //   return 1;
-      // }
-
-      let images_preload = async function() {
-        var img_urls = {{labels | tojson}};
-        for (i = 0; i < img_urls.length; i++) {
-          await tmp.addImageProcess(img_urls[i]);
-        }
-      }
-
-      images_preload();
-      let reset = async function() {
-        await images_preload();
-        start_count = 5;
-        var x = setInterval(function() {
-          start_count--;
-          document.getElementById("countdown").innerHTML = "The memory game will start in " + start_count + " seconds.";
-          if (start_count <= 0) {
-              clearInterval(x);
-              document.getElementById("countdown").innerHTML = "The memory game has started.";
-          }
-        }, 1000);
-      }
-
+      image_count = 0;
       let game_start = async function() {
-        await reset();
-        image_count = 0;
+        setTimeout(() => {document.getElementById("countdown").innerHTML = "Game started!";}, 500);
         var y = setInterval(function() {
+          if(image_count==198) {
+            document.getElementById("countdown").innerHTML = "game ended.";
+            $.getJSON($SCRIPT_ROOT + '/img_url', {answer: 3}, {});
+            clearInterval(y);
+          }
           $.getJSON($SCRIPT_ROOT + '/img_url', {answer: answer}, function(data) {
             answer = 0;
-            document.body.style.backgroundColor = "#ffffff";
+            document.body.style.backgroundColor = "#ffe577";
             document.getElementById('image').src = data.url;
             image_count++;
             document.getElementById('progress').value = image_count;
             document.getElementById("progree_count").innerHTML = "Image remained: " + (198 - image_count);
             
-            setTimeout(() => {
-              document.getElementById('image').src = "static/blank.png";
-            }, 600);
+            // setTimeout(() => {
+            //   document.getElementById('image').removeAttribute('src');
+            //   // document.getElementById('image').src = "static/blank.png";
+            // }, 600);
             });
             document.body.onkeyup = function(e){
+              modal.style.display = "none";
               if(e.keyCode == 32){
                 answer=1;
-                document.body.style.backgroundColor = "#C1C1C1";
+                document.body.style.backgroundColor = "#ffe8a7";
               }
               if (e.keyCode==27){
+                document.getElementById("countdown").innerHTML = "Restarting game...";
                 answer = 2;
-                reset();
-                setTimeout(() => {game_start();}, 5000);
+                image_count = 0;
+                game_start();
                 clearInterval(y);
               }
-              if (e.keyCode==83){
-                document.getElementById("countdown").innerHTML = "Game ended and all your progress has been saved!";
-                document.getElementById("tips1").innerHTML = "";
-                document.getElementById("tips2").innerHTML = "Press <kbd>c</kbd> to continue the game.";
-                document.getElementById("tips3").innerHTML = "";
+              if (e.keyCode==80){
+                document.getElementById("countdown").innerHTML = "Game paused and all your progress has been saved!";
+                $.getJSON($SCRIPT_ROOT + '/img_url', {answer: 3}, {});
                 clearInterval(y);
+                document.body.onkeyup = function(e){
+                  if (e.keyCode==83){
+                    game_start();
+                  }
+                }
+              }
+              if (e.keyCode==72){
+                modal.style.display = "block";
               }
             }
 
           }, 1400);
       }
-      reset();
-      setTimeout(() => {game_start();}, 5000);
-      
+      let images_preload = async function() {
+        for (i = 0; i < img_urls.length; i++) {
+          await tmp.addImageProcess(img_urls[i]);
+        }
+        document.getElementById("countdown").innerHTML = "All images are downloaded!"
+      }
+      document.body.onkeyup = function(e){
+        if (e.keyCode==83){
+          document.getElementById("countdown").innerHTML = "The game will start when images downloading finish.";
+          game_start();
+        }
+        if (e.keyCode==27){
+          document.getElementById("countdown").innerHTML = "Restarting game...";
+          answer = 2;
+          image_count = 0;
+          game_start();
+        }
+      }
     </script>

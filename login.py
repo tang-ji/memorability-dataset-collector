@@ -1,5 +1,5 @@
 from flask import Flask, flash, redirect, render_template, request, session, abort, jsonify, make_response
-import os
+import os, pickle
 from glob import glob
 
 app = Flask(__name__)
@@ -12,6 +12,14 @@ class server:
         self.i = 0
         self.username = None
         self.log = {}
+        self.logs = {}
+    def login(self, username):
+        self.username = username
+        if username in self.logs:
+            self.log = self.logs[username]
+        else:
+            self.logs[username] = {}
+        self.i = len(self.log)
     def get(self):
         self.i += 1
         if self.i >= len(self.imgs):
@@ -22,7 +30,9 @@ class server:
     def last(self):
         return self.imgs[self.i]
     def reset(self):
-        self.i = 0
+        self.i = len(self.logs[self.username])
+    def welcome(self):
+        return("Hi {}, you have already marked {} images.".format(self.username, self.i))
 
 def reset():
     server_class.log = {}
@@ -33,28 +43,25 @@ def home():
     if not session.get('logged_in'):
         return render_template('login.html')
     else:
-        urls = server_class.get_all()
-        response = make_response(render_template('test.html', labels=urls))
-        response.headers['Cache-Control'] = 'public'
-        response.headers['Expires'] = '300'
-        # return response
-        return render_template('test.html', labels=urls)
+        labels = server_class.get_all()
+        labels.append(server_class.welcome())
+        return render_template('test.html', labels=labels)
 
 @app.route('/img_url')
 def img_url():
     answer = request.args.get('answer', 0, type=int);
     if answer == 2:
         reset()
+    elif answer == 3:
+        server_class.logs[server_class.username] = server_class.log
     else:
-        if server_class.username not in server_class.log:
-            server_class.log[server_class.username] = {}
         image_name = os.path.split(server_class.last())[1]
-        server_class.log[server_class.username][image_name] = answer
+        server_class.log[image_name] = answer
     return jsonify(url=server_class.get())
 
 @app.route('/login', methods=['POST'])
 def do_admin_login():
-    server_class.username = request.form['username']
+    server_class.login(request.form['username'])
     session['logged_in'] = True
     return home()   
 
@@ -66,9 +73,13 @@ def logout():
 
 
 if __name__ == "__main__":
-    server_class = server("static/imgs")
+    try:
+        server_class = server("static/imgs")
+    except:
+        server_class = pickle.load(open("logs.pkl", "rb"))
     try:
         app.secret_key = os.urandom(12)
         app.run(host='0.0.0.0', port=5000)
     finally:
-        print(server_class.username, server_class.log)
+        pickle.dump(server_class, open("logs.pkl", "wb"))
+        print(server_class.logs)
