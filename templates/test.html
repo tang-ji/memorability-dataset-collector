@@ -201,10 +201,10 @@
         var y = setInterval(function() {
           $.getJSON($SCRIPT_ROOT + '/img_url', {answer: answer}, function(data) {
             answer = 0;
-            document.body.style.backgroundColor = "#ffe577";
-            document.getElementById('image').src = data.url;
             image_count++;
             if(image_count<=200) {
+              document.body.style.backgroundColor = "#ffe577";
+              document.getElementById('image').src = data.url;
               document.getElementById('progress').value = image_count;
               document.getElementById("progree_count").innerHTML = "Image remained: " + (200 - image_count);
             }

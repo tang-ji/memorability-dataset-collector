@@ -80,9 +80,9 @@ def logout():
 
 if __name__ == "__main__":
     try:
-        server_class = server("static/imgs")
-    except:
         server_class = pickle.load(open("logs.pkl", "rb"))
+    except:
+        server_class = server("static/imgs")
     try:
         app.secret_key = os.urandom(12)
         app.run(host='0.0.0.0', port=5000)
