@@ -150,8 +150,8 @@
             </div>
           </div>
             <h1><p id="countdown">Images pre-downloading...</p></h1>
-            <h3><label id="progree_count">Image remained: 198</label>
-              <progress id="progress" value="0" max="198"></progress>
+            <h3><label id="progree_count">Image remained: 200</label>
+              <progress id="progress" value="0" max="200"></progress>
             </h3>
             <div class="img">
               <img id="image" style="width:600px; align-self:center">
@@ -165,7 +165,7 @@
       var modal = document.getElementById("myModal");
       var span = document.getElementsByClassName("close")[0];
       var labels = {{labels | tojson}};
-      var img_urls = labels.slice(0, labels.length);
+      var img_urls = labels.slice(0, labels.length-1);
       var welcome = labels[labels.length-1];
       document.getElementById("welcome").innerHTML = welcome;
       modal.style.display = "block";
@@ -181,7 +181,7 @@
         }
       }
 
-      answer = 0;
+      answer = -1;
       class Temp {
         addImageProcess(src){
           return new Promise((resolve, reject) => {
@@ -199,24 +199,26 @@
       let game_start = async function() {
         setTimeout(() => {document.getElementById("countdown").innerHTML = "Game started!";}, 500);
         var y = setInterval(function() {
-          if(image_count==198) {
-            document.getElementById("countdown").innerHTML = "game ended.";
-            $.getJSON($SCRIPT_ROOT + '/img_url', {answer: 3}, {});
-            clearInterval(y);
-          }
           $.getJSON($SCRIPT_ROOT + '/img_url', {answer: answer}, function(data) {
             answer = 0;
             document.body.style.backgroundColor = "#ffe577";
             document.getElementById('image').src = data.url;
             image_count++;
-            document.getElementById('progress').value = image_count;
-            document.getElementById("progree_count").innerHTML = "Image remained: " + (198 - image_count);
+            if(image_count<=200) {
+              document.getElementById('progress').value = image_count;
+              document.getElementById("progree_count").innerHTML = "Image remained: " + (200 - image_count);
+            }
             
             // setTimeout(() => {
             //   document.getElementById('image').removeAttribute('src');
             //   // document.getElementById('image').src = "static/blank.png";
             // }, 600);
             });
+            if(image_count==200) {
+              document.getElementById("countdown").innerHTML = "game ended.";
+              $.getJSON($SCRIPT_ROOT + '/img_url', {answer: 3}, {});
+              clearInterval(y);
+            }
             document.body.onkeyup = function(e){
               modal.style.display = "none";
               if(e.keyCode == 32){
@@ -253,6 +255,7 @@
         }
         document.getElementById("countdown").innerHTML = "All images are downloaded!"
       }
+      images_preload();
       document.body.onkeyup = function(e){
         if (e.keyCode==83){
           document.getElementById("countdown").innerHTML = "The game will start when images downloading finish.";
