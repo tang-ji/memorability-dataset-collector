@@ -1,8 +1,10 @@
 import numpy as np
 
-def get_files(imgs, n_targets=66, n_filler=22, n_vigilence=12):
-    files = np.random.choice(imgs, n_targets + n_filler + n_vigilence, replace=False)
+def get_files(imgs, marked, n_targets=66, n_filler=22, n_vigilence=12):
+    imgs_new = [img for img in imgs if img not in marked]
+    files = np.random.choice(imgs_new, n_targets + n_filler + n_vigilence, replace=False)
     return files[:n_targets], files[n_targets: n_targets + n_filler], files[n_targets + n_filler: n_targets + n_filler + n_vigilence]
+
     
 def next_vig(available, i, max_vigilence):
     l = []
@@ -78,6 +80,12 @@ def evaluation(labels, answers):
     results["correct_vigilence"] = sum(answers[labels==3]==0)
     results["correct_vigilence_rep"] = sum(answers[labels==4]==1)
     return results
+
+def score(n_targets, n_filler, n_vigilence, labels, answers):
+    e = evaluation(labels, answers)
+    s_max = n_targets*3+n_filler+n_vigilence*2
+    s = e["correct_filler"]+e["correct_target"]+2*e["correct_target_rep"]+e["correct_vigilence"]+e["correct_vigilence_rep"] 
+    return int(np.sqrt(s)/np.sqrt(s_max)*100)
 
 def print_result(n_targets, n_filler, n_vigilence, labels, answers):
     e = evaluation(labels, answers)

@@ -133,7 +133,7 @@
     <div class="context">
         <div class="container">
           <form action="/logout" method="POST">
-            <h3><label id="welcome"></label> Press <kbd>H</kbd> for help. It's not you?<button type="submit">Log Out</button></h3> 
+            <h3><label id="welcome"></label> Press <kbd>H</kbd> for help. <p>It's not you?<button type="submit">Log Out</button></p></h3> 
           <div id="myModal" class="modal">
             <div class="modal-content">
               <div class="modal-header">
@@ -154,7 +154,7 @@
               <progress id="progress" value="0" max="200"></progress>
             </h3>
             <div class="img">
-              <img id="image" style="width:600px; align-self:center">
+              <img id="image" style="width:550px; align-self:center">
             </div>
         </div>
     </div>  
@@ -168,6 +168,8 @@
       var img_urls = labels.slice(0, labels.length-1);
       var welcome = labels[labels.length-1];
       document.getElementById("welcome").innerHTML = welcome;
+      document.getElementById("progree_count").innerHTML = "Image remained: " + img_urls.length;
+      document.getElementById("progress").setAttribute("max", img_urls.length);
       modal.style.display = "block";
       // When the user clicks on <span> (x), close the modal
       span.onclick = function() {
@@ -181,7 +183,6 @@
         }
       }
 
-      answer = -1;
       class Temp {
         addImageProcess(src){
           return new Promise((resolve, reject) => {
@@ -194,47 +195,34 @@
       }
       
       let tmp = new Temp();
-
-      image_count = 0;
+      var answer = -1, answers = new Array(img_urls.length).fill(0);
+      var image_count = 0;
+        
       let game_start = async function() {
         setTimeout(() => {document.getElementById("countdown").innerHTML = "Game started!";}, 500);
         var y = setInterval(function() {
-          $.getJSON($SCRIPT_ROOT + '/img_url', {answer: answer}, function(data) {
-            answer = 0;
-            image_count++;
-            if(image_count<=200) {
-              document.body.style.backgroundColor = "#ffe577";
-              document.getElementById('image').src = data.url;
-              document.getElementById('progress').value = image_count;
-              document.getElementById("progree_count").innerHTML = "Image remained: " + (200 - image_count);
-            }
+          if(image_count < img_urls.length) {
+            document.body.style.backgroundColor = "#ffe577";
+            document.getElementById('image').src = img_urls[image_count];
+            document.getElementById('progress').value = image_count+1;
+            document.getElementById("progree_count").innerHTML = "Image remained: " + (img_urls.length-1 - image_count);
             
-            // setTimeout(() => {
-            //   document.getElementById('image').removeAttribute('src');
-            //   // document.getElementById('image').src = "static/blank.png";
-            // }, 600);
-            });
-            if(image_count==200) {
-              document.getElementById("countdown").innerHTML = "game ended.";
-              $.getJSON($SCRIPT_ROOT + '/img_url', {answer: 3}, {});
-              clearInterval(y);
-            }
             document.body.onkeyup = function(e){
               modal.style.display = "none";
               if(e.keyCode == 32){
-                answer=1;
+                answers[image_count] = 1;
                 document.body.style.backgroundColor = "#ffe8a7";
               }
               if (e.keyCode==27){
                 document.getElementById("countdown").innerHTML = "Restarting game...";
-                answer = 2;
+                $.getJSON($SCRIPT_ROOT + '/img_url', {answer: 2}, {});
+                answers = new Array(img_urls.length).fill(0);
                 image_count = 0;
                 game_start();
                 clearInterval(y);
               }
               if (e.keyCode==80){
-                document.getElementById("countdown").innerHTML = "Game paused and all your progress has been saved!";
-                $.getJSON($SCRIPT_ROOT + '/img_url', {answer: 3}, {});
+                document.getElementById("countdown").innerHTML = "Game paused";
                 clearInterval(y);
                 document.body.onkeyup = function(e){
                   if (e.keyCode==83){
@@ -246,8 +234,15 @@
                 modal.style.display = "block";
               }
             }
-
-          }, 1400);
+            image_count++;
+          } else {
+              clearInterval(y);
+              document.getElementById("countdown").innerHTML = "game ended.";
+              $.getJSON($SCRIPT_ROOT + '/answer', {answers: JSON.stringify(answers.slice(0, img_urls.length))}, function(data) {
+                document.getElementById("countdown").innerHTML = "Your final score is " + data.score + "/100, thank you!";
+              });
+              $.getJSON($SCRIPT_ROOT + '/img_url', {answer: 3}, {});
+          }}, 1400);
       }
       let images_preload = async function() {
         for (i = 0; i < img_urls.length; i++) {
@@ -263,7 +258,8 @@
         }
         if (e.keyCode==27){
           document.getElementById("countdown").innerHTML = "Restarting game...";
-          answer = 2;
+          $.getJSON($SCRIPT_ROOT + '/img_url', {answer: 2}, {});
+          answers = new Array(img_urls.length).fill(0);
           image_count = 0;
           game_start();
         }
