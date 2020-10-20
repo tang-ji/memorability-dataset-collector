@@ -23,7 +23,7 @@ class server:
         if username in self.logs:
             self.log = self.logs[username]
         else:
-            self.logs[username] = {}
+            self.logs[username] = []
         self.i = len(self.log)
     def get(self):
         self.i += 1
