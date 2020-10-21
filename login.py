@@ -6,38 +6,65 @@ from data import *
 app = Flask(__name__)
 
 class server:
-    def __init__(self, img_paths, n_targets=66, n_filler=44, n_vigilence=12):
+    def __init__(self, img_path, database_path="data", n_targets=66, n_filler=44, n_vigilence=12):
         self.n_targets = n_targets
         self.n_filler = n_filler
         self.n_vigilence = n_vigilence
         self.n = n_targets*2 + n_filler + n_vigilence*2
-        self.img_paths = img_paths
-        self.imgs_file = [os.path.split(p)[1] for p in glob(os.path.join(img_paths, "*.jpg"))]
-        self.i = 0
-        self.score = []
-        self.scores = {}
+        self.img_path = img_path
+        self.database_path = database_path
+        if not os.path.exists(database_path):
+            os.makedirs(database_path)
+        self.imgs_file = [os.path.split(p)[1] for p in glob(os.path.join(img_path, "*.jpg"))]
+
         self.username = None
-        self.log = []
-        self.logs = {}
-        self.mark = set()
-        self.marks = {}
-        self.dataset = {}
         
     def login(self, username):
         self.username = username
-        if username in self.logs:
-            self.log = self.logs[username].copy()
-            self.mark = self.marks[username].copy()
-            self.score = self.scores[username].copy()
-        else:
-            self.logs[username] = []
-            self.marks[username] = set()
-            self.dataset[username] = {}
-            self.scores[username] = []
-        self.i = 0
-        file_targets, file_filler, file_vigilence = get_files(self.imgs_file, self.mark, n_targets=self.n_targets, n_filler=self.n_filler, n_vigilence=self.n_vigilence)
+        self.user_data_path = os.path.join(self.database_path, username)
+        if not os.path.exists(self.user_data_path):
+            os.makedirs(self.user_data_path)
+
+        self.load()
+
+    def save(self):
+        print("Saving dataset for user: {}".format(self.username))
+        if not os.path.exists(self.user_data_path):
+            os.makedirs(self.user_data_path)
+
+        with open(os.path.join(self.user_data_path, "data.pkl"), 'wb') as f:
+            pickle.dump([self.log, self.scores, self.marks], f)
+
+        with open(os.path.join(self.user_data_path, "labels.txt"), 'w') as f:
+            for k, v in self.dataset.items():
+                f.write("{} {}\n".format(k, v))
+        print("User: {} data saved.".format(self.username))
+
+    def load(self):
+        if not os.path.exists(self.user_data_path):
+            os.makedirs(self.user_data_path)
+        try:
+            [self.log, self.scores, self.marks] = pickle.load(open(os.path.join(self.user_data_path, "data.pkl"), 'rb'))
+        except:
+            print("No data found for user: {}, create new dataset.".format(self.username))
+            self.log = []
+            self.scores = []
+            self.marks = set()
+            pass
+        try:
+            self.dataset = {}
+            with open(os.path.join(self.user_data_path, "labels.txt"), 'rb') as f:
+                ls = f.readlines()
+                for l in ls:
+                    file_name, label = l.strip().split(" ")
+                    self.dataset[file_name] = label
+        except:
+            self.dataset = {}
+            pass
+
+        file_targets, file_filler, file_vigilence = get_files(self.imgs_file, self.marks, n_targets=self.n_targets, n_filler=self.n_filler, n_vigilence=self.n_vigilence)
         self.imgs, self.labels = get_sequence(file_targets, file_filler, file_vigilence) 
-        self.mark |= set(self.imgs)
+
         
     # def get(self):
     #     self.i += 1
@@ -47,19 +74,19 @@ class server:
     def get_all(self):
         if debug:
             self.labels = [0]*10
-            return [os.path.join(self.img_paths,p) for p in self.imgs[self.i:self.i+10]]
-        return [os.path.join(self.img_paths,p) for p in self.imgs[self.i:self.i+self.n]]
-    def last(self):
-        return self.imgs[self.i]
+            return [os.path.join(self.img_path,p) for p in self.imgs[:10]]
+        return [os.path.join(self.img_path,p) for p in self.imgs[:self.n]]
+    # def last(self):
+    #     return self.imgs[self.i]
     def reset(self):
-        self.i = len(self.marks[self.username])
-        self.log = []
+        self.load()
+
     def welcome(self):
-        if len(self.score) == 0:
+        if len(self.scores) == 0:
             score_max = 0
         else:
-            score_max = max(self.scores[self.username])
-        return("Hi {}, you have already marked {} images. Your highest score is {}/100.".format(self.username, len(self.marks[self.username]), score_max))
+            score_max = max(self.scores)
+        return("Hi {}, you have already marked {} images. Your highest score is {}/100.".format(self.username, len(self.marks), score_max))
                
                
 @app.route('/')
@@ -77,15 +104,13 @@ def img_url():
     if answer == 2:
         server_class.reset()
     elif answer == 3:
-        server_class.logs[server_class.username] = server_class.log
-        server_class.scores[server_class.username] = server_class.score
-        server_class.marks[server_class.username] |= server_class.mark
+        server_class.marks |= set(server_class.get_all())
         print_result(server_class.n_targets, server_class.n_filler, server_class.n_vigilence, server_class.labels, server_class.log)
+
         for i in range(len(server_class.log)):
-            image_name = os.path.split(server_class.imgs[i])[1]
             if server_class.labels[i] == 2:
-                server_class.dataset[server_class.username][image_name] = server_class.log[i]
-        pickle.dump(server_class, open("logs.pkl", "wb"))
+                server_class.dataset[server_class.imgs[i]] = server_class.log[i]
+        server_class.save()
     return jsonify(url=server_class.get())
 
 @app.route('/answer')
@@ -93,7 +118,7 @@ def get_answer():
     answer = json.loads(request.args.get('answers'))
     server_class.log = answer
     s = score(server_class.n_targets, server_class.n_filler, server_class.n_vigilence, server_class.labels, answer)
-    server_class.score.append(s)
+    server_class.scores.append(s)
     return jsonify(score=s)
 
 @app.route('/login', methods=['POST'])
@@ -112,20 +137,9 @@ def logout():
 
 if __name__ == "__main__":
     debug = False
-    if debug:
-        server_class = server("static/imgs")
+    server_class = server("static/imgs")
+    try:
         app.secret_key = os.urandom(12)
         app.run(host='0.0.0.0', port=5000)
-        print(server_class.logs)
-    else:
-        try:
-            server_class = pickle.load(open("logs.pkl", "rb"))
-        except:
-            server_class = server("static/imgs")
-        try:
-            app.secret_key = os.urandom(12)
-            app.run(host='0.0.0.0', port=5000)
-        finally:
-            pickle.dump(server_class, open("logs.pkl", "wb"))
-            print("user:{} data saved. ({} images marked)".format(server_class.username, len(server_class.marks[server_class.username])))
-            
+    finally:
+        print("user:{} data saved. ({} images marked)".format(server_class.username, len(server_class.marks)))
