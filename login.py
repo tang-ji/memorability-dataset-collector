@@ -11,7 +11,8 @@ class server:
         self.n_filler = n_filler
         self.n_vigilence = n_vigilence
         self.n = n_targets*2 + n_filler + n_vigilence*2
-        self.imgs_file = glob("{}/*.jpg".format(img_paths))
+        self.img_paths = img_paths
+        self.imgs_file = [os.path.split(p)[1] for p in glob(os.path.join(img_paths, "*.jpg"))]
         self.i = 0
         self.score = []
         self.scores = {}
@@ -38,16 +39,16 @@ class server:
         self.imgs, self.labels = get_sequence(file_targets, file_filler, file_vigilence) 
         self.mark |= set(self.imgs)
         
-    def get(self):
-        self.i += 1
-        if self.i >= len(self.imgs):
-            self.i = 0
-        return self.imgs[self.i]
+    # def get(self):
+    #     self.i += 1
+    #     if self.i >= len(self.imgs):
+    #         self.i = 0
+    #     return os.path.join(img_paths,self.imgs[self.i])
     def get_all(self):
         if debug:
             self.labels = [0]*10
-            return self.imgs[self.i:self.i+10]
-        return self.imgs[self.i:self.i+self.n]
+            return [os.path.join(self.img_paths,p) for p in self.imgs[self.i:self.i+10]]
+        return [os.path.join(self.img_paths,p) for p in self.imgs[self.i:self.i+self.n]]
     def last(self):
         return self.imgs[self.i]
     def reset(self):
@@ -126,4 +127,5 @@ if __name__ == "__main__":
             app.run(host='0.0.0.0', port=5000)
         finally:
             pickle.dump(server_class, open("logs.pkl", "wb"))
-            print("user:{} data saved. ({} images marked)".format(server_class.username, len(self.marks[self.username])))
+            print("user:{} data saved. ({} images marked)".format(server_class.username, len(server_class.marks[server_class.username])))
+            
