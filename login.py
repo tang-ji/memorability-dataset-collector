@@ -57,7 +57,7 @@ class server:
         if len(self.score) == 0:
             score_max = 0
         else:
-            score_max = max(self.score)
+            score_max = max(self.scores[self.username])
         return("Hi {}, you have already marked {} images. Your highest score is {}/100.".format(self.username, len(self.marks[self.username]), score_max))
                
                
