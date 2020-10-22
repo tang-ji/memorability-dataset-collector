@@ -1,5 +1,5 @@
 from flask import Flask, flash, redirect, render_template, request, session, abort, jsonify, make_response
-import os, pickle, json, secrets
+import os, pickle, json, secrets, time
 from glob import glob
 from data import *
 
@@ -24,36 +24,35 @@ class server:
         self.user_data_path = os.path.join(self.database_path, username)
         if not os.path.exists(self.user_data_path):
             os.makedirs(self.user_data_path)
-
         self.load()
 
     def save(self):
-        print("Saving dataset for user: {}".format(self.username))
         if not os.path.exists(self.user_data_path):
             os.makedirs(self.user_data_path)
 
         with open(os.path.join(self.user_data_path, "data.pkl"), 'wb') as f:
-            pickle.dump([self.log, self.scores, self.marks], f)
+            pickle.dump([self.evaluations, self.scores, self.marks], f)
 
         with open(os.path.join(self.user_data_path, "labels.txt"), 'w') as f:
             for k, v in self.dataset.items():
                 f.write("{} {}\n".format(k, v))
-        print("User: {} data saved.".format(self.username))
 
     def load(self):
         if not os.path.exists(self.user_data_path):
             os.makedirs(self.user_data_path)
         try:
-            [self.log, self.scores, self.marks] = pickle.load(open(os.path.join(self.user_data_path, "data.pkl"), 'rb'))
+            [self.evaluations, self.scores, self.marks] = pickle.load(open(os.path.join(self.user_data_path, "data.pkl"), 'rb'))
         except:
-            print("No data found for user: {}, create new dataset.".format(self.username))
-            self.log = []
+            with open("log.txt", 'a+') as f:
+                f.write(time.strftime("[%Y-%m-%d %H:%M:%S] ", time.localtime()))
+                f.write("[{}] New user.\n".format(server_class[session['username']].username))
+            self.evaluations = []
             self.scores = []
             self.marks = set()
             pass
         try:
             self.dataset = {}
-            with open(os.path.join(self.user_data_path, "labels.txt"), 'rb') as f:
+            with open(os.path.join(self.user_data_path, "labels.txt"), 'r') as f:
                 ls = f.readlines()
                 for l in ls:
                     file_name, label = l.strip().split(" ")
@@ -101,15 +100,20 @@ def home():
 @app.route('/answer')
 def get_answer():
     answer = json.loads(request.args.get('answers'))
-    server_class[session['username']].log = answer
     s = score(server_class[session['username']].n_targets, server_class[session['username']].n_filler, server_class[session['username']].n_vigilence, server_class[session['username']].labels, answer)
     server_class[session['username']].scores.append(s)
     server_class[session['username']].marks |= set(server_class[session['username']].get_all())
-    print("User: {} result: {}".format(session['username'], s))
+    e = evaluation(server_class[session['username']].labels, answer)
+    server_class[session['username']].evaluations.append([e["correct_filler"], e["correct_target"], e["correct_target_rep"], e["correct_vigilence"], e["correct_vigilence_rep"]])
+    with open("log.txt", 'a+') as f:
+        f.write(time.strftime("[%Y-%m-%d %H:%M:%S] ", time.localtime()))
+        f.write("[{}] Score: {}. ".format(session['username'], s))
+        f.write(return_result(server_class[session['username']].n_targets, server_class[session['username']].n_filler, server_class[session['username']].n_vigilence, server_class[session['username']].labels, answer))
+        f.write("\n")
 
-    for i in range(len(server_class[session['username']].log)):
+    for i in range(len(answer)):
         if server_class[session['username']].labels[i] == 2:
-            server_class[session['username']].dataset[server_class[session['username']].imgs[i]] = server_class[session['username']].log[i]
+            server_class[session['username']].dataset[server_class[session['username']].imgs[i]] = answer[i]
     server_class[session['username']].save()
     return jsonify(score=s)
 
@@ -120,13 +124,17 @@ def do_admin_login():
     server_class[username].login(username)
     session['logged_in'] = True
     session['username'] = username
-    print("User:{} log in.".format(server_class[session['username']].username))
+    with open("log.txt", 'a+') as f:
+        f.write(time.strftime("[%Y-%m-%d %H:%M:%S] ", time.localtime()))
+        f.write("[{}] Log in.\n".format(server_class[session['username']].username))
     return home()   
 
 @app.route("/logout", methods=['POST'])
 def logout():
     session['logged_in'] = False
-    print("User:{} log out.".format(server_class[session['username']].username))
+    with open("log.txt", 'a+') as f:
+        f.write(time.strftime("[%Y-%m-%d %H:%M:%S] ", time.localtime()))
+        f.write("[{}] Log out.\n".format(server_class[session['username']].username))
     server_class.pop(session['username'], None)
     
     return home()

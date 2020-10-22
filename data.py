@@ -87,8 +87,8 @@ def score(n_targets, n_filler, n_vigilence, labels, answers):
     s = e["correct_filler"]+e["correct_target"]+2*e["correct_target_rep"]+e["correct_vigilence"]+e["correct_vigilence_rep"] 
     return int(np.sqrt(s)/np.sqrt(s_max)*100)
 
-def print_result(n_targets, n_filler, n_vigilence, labels, answers):
+def return_result(n_targets, n_filler, n_vigilence, labels, answers):
     e = evaluation(labels, answers)
-    print("filler accuracy: {:.1f}%, target accuracy: {:.1f}%, vigilence accuracy: {:.1f}%".format(e['correct_filler']/n_filler*100, 
+    return("filler accuracy: {:.1f}%, target accuracy: {:.1f}%, vigilence accuracy: {:.1f}%".format(e['correct_filler']/n_filler*100, 
                                                                                                (e['correct_target']+e['correct_target_rep'])/(2*n_targets)*100, 
                                                                                                (e['correct_vigilence']+e['correct_vigilence_rep'])/(2*n_vigilence)*100))
