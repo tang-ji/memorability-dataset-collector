@@ -1,5 +1,5 @@
 from flask import Flask, flash, redirect, render_template, request, session, abort, jsonify, make_response
-import os, pickle, json
+import os, pickle, json, secrets
 from glob import glob
 from data import *
 
@@ -86,60 +86,54 @@ class server:
             score_max = 0
         else:
             score_max = max(self.scores)
-        return("Hi {}, you have already marked {} images. Your highest score is {}/100.".format(self.username, len(self.marks), score_max))
-               
+        return("Hi {}, you have already marked {} images. Your highest score is {}/100.".format(self.username, len(self.marks), score_max))           
                
 @app.route('/')
 def home():
     if not session.get('logged_in'):
         return render_template('login.html')
     else:
-        labels = list(server_class.get_all())
-        labels.append(server_class.welcome())
+        server_class[session['username']].load()
+        labels = list(server_class[session['username']].get_all())
+        labels.append(server_class[session['username']].welcome())
         return render_template('test.html', labels=labels)
-
-@app.route('/img_url')
-def img_url():
-    answer = request.args.get('answer', 0, type=int)
-    if answer == 2:
-        server_class.reset()
-    elif answer == 3:
-        server_class.marks |= set(server_class.get_all())
-        print_result(server_class.n_targets, server_class.n_filler, server_class.n_vigilence, server_class.labels, server_class.log)
-
-        for i in range(len(server_class.log)):
-            if server_class.labels[i] == 2:
-                server_class.dataset[server_class.imgs[i]] = server_class.log[i]
-        server_class.save()
-    return jsonify(url=server_class.get())
 
 @app.route('/answer')
 def get_answer():
     answer = json.loads(request.args.get('answers'))
-    server_class.log = answer
-    s = score(server_class.n_targets, server_class.n_filler, server_class.n_vigilence, server_class.labels, answer)
-    server_class.scores.append(s)
+    server_class[session['username']].log = answer
+    s = score(server_class[session['username']].n_targets, server_class[session['username']].n_filler, server_class[session['username']].n_vigilence, server_class[session['username']].labels, answer)
+    server_class[session['username']].scores.append(s)
+    server_class[session['username']].marks |= set(server_class[session['username']].get_all())
+    print("User: {} result: {}".format(session['username'], s))
+
+    for i in range(len(server_class[session['username']].log)):
+        if server_class[session['username']].labels[i] == 2:
+            server_class[session['username']].dataset[server_class[session['username']].imgs[i]] = server_class[session['username']].log[i]
+    server_class[session['username']].save()
     return jsonify(score=s)
 
 @app.route('/login', methods=['POST'])
 def do_admin_login():
-    server_class.login(request.form['username'].lower())
+    username = request.form['username'].lower()
+    server_class[username] = server("static/imgs")
+    server_class[username].login(username)
     session['logged_in'] = True
-    print("user:{} log in.".format(server_class.username))
+    session['username'] = username
+    print("User:{} log in.".format(server_class[session['username']].username))
     return home()   
 
 @app.route("/logout", methods=['POST'])
 def logout():
-    server_class.reset()
     session['logged_in'] = False
+    print("User:{} log out.".format(server_class[session['username']].username))
+    server_class.pop(session['username'], None)
+    
     return home()
 
 
 if __name__ == "__main__":
-    debug = False
-    server_class = server("static/imgs")
-    try:
-        app.secret_key = os.urandom(12)
-        app.run(host='0.0.0.0', port=5000)
-    finally:
-        print("user:{} data saved. ({} images marked)".format(server_class.username, len(server_class.marks)))
+    debug = True
+    server_class = {}
+    app.secret_key = os.urandom(12)
+    app.run(host='0.0.0.0', port=5000)
