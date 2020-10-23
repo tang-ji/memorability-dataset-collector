@@ -85,7 +85,7 @@ def score(n_targets, n_filler, n_vigilence, labels, answers):
     e = evaluation(labels, answers)
     s_max = n_targets*3+n_filler+n_vigilence*2
     s = e["correct_filler"]+e["correct_target"]+2*e["correct_target_rep"]+e["correct_vigilence"]+e["correct_vigilence_rep"] 
-    return int(np.sqrt(s)/np.sqrt(s_max)*100)
+    return round(np.sqrt(s)/np.sqrt(s_max)*100, 1)
 
 def return_result(n_targets, n_filler, n_vigilence, labels, answers):
     e = evaluation(labels, answers)

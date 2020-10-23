@@ -35,13 +35,13 @@
       .modal-header {
         padding: 2px 16px;
         background-color: #ffe8a7;
-        color: white;
+        color: black;
       }
       .modal-body {padding: 2px 16px;}
       /* Modal Footer */
       .modal-footer {
         padding: 2px 16px;
-        background-color: #5cb85c;
+        background-color: #ffe8a7;
         color: white;
       }
       .modal {
@@ -138,14 +138,19 @@
             <div class="modal-content">
               <div class="modal-header">
                 <span class="close">&times;</span>
-                <h2>shortcut key</h2>
+                <h2>Tips</h2>
               </div>
               <div class="modal-body">
-                <h4 id="tips1"><kbd>Space</kbd> mark current image as "seen" when you think you have already seen the current image.</h4>
-                  <h4 id="tips2"><kbd>S</kbd> start the game. </h4>
+                <h4>After the game start, you will see a series of images. Some of them will be shown twice, so your task is to find them out. Every image will be shown during 1.4 seconds, pay attention but take it easy!</h4>
+                <h4 id="tips1"><kbd>Space</kbd> mark the current image as "seen" if you think it's not the first time you see it.</h4>
                   <h4 id="tips2"><kbd>P</kbd> pause the game. </h4>
-                  <h4 id="tips3"><kbd>ESC</kbd> retart the game. </h4>
-                  <h4 id="tips3"><kbd>H</kbd> for help. </h4>
+                  <h4 id="tips3"><kbd>ESC</kbd> retart the game. (don't use it in the end of game, because you will be confused about what you have already seen) </h4>
+                  <h4 id="tips4"><kbd>H</kbd> for help. </h4>
+                  <h4 id="tips5"><kbd>L</kbd> for leaderboard. </h4>
+                  <label id="board"></label>
+              </div>
+              <div class="modal-footer">
+                
               </div>
             </div>
           </div>
@@ -165,6 +170,7 @@
       var modal = document.getElementById("myModal");
       var span = document.getElementsByClassName("close")[0];
       var labels = {{labels | tojson}};
+      var board = {{board | tojson}};
       var img_urls = labels.slice(0, labels.length-1);
       var welcome = labels[labels.length-1];
       document.getElementById("welcome").innerHTML = welcome;
@@ -197,9 +203,11 @@
       let tmp = new Temp();
       var answer = -1, answers = new Array(img_urls.length).fill(0);
       var image_count = 0;
+      var if_start = false;
         
       let game_start = async function() {
         setTimeout(() => {document.getElementById("countdown").innerHTML = "Game started!";}, 500);
+        if_start = true;
         var y = setInterval(function() {
           if(image_count < img_urls.length) {
             document.body.style.backgroundColor = "#ffe577";
@@ -214,54 +222,79 @@
                 document.body.style.backgroundColor = "#ffe8a7";
               }
               if (e.keyCode==27){
+                if_start = false;
                 document.getElementById("countdown").innerHTML = "Restarting game...";
                 // $.getJSON($SCRIPT_ROOT + '/img_url', {answer: 2}, {});
                 answers = new Array(img_urls.length).fill(0);
                 image_count = 0;
-                game_start();
+                if(if_start==false) game_start();
                 clearInterval(y);
-              }
-              if (e.keyCode==80){
-                document.getElementById("countdown").innerHTML = "Game paused";
-                clearInterval(y);
-                document.body.onkeyup = function(e){
-                  if (e.keyCode==83){
-                    game_start();
-                  }
-                }
               }
               if (e.keyCode==72){
                 modal.style.display = "block";
+              }
+              if (e.keyCode==80){
+                if_start = false;
+                document.getElementById("countdown").innerHTML = "Game paused, press <kbd>Space</kbd> to continue.";
+                clearInterval(y);    
+                document.body.onkeyup = function(e){
+                  if (e.keyCode==32){
+                    if(if_start==false) game_start();
+                  }
+                  if (e.keyCode==72){
+                    modal.style.display = "block";
+                  }
+                }
               }
             }
             image_count++;
           } else {
               clearInterval(y);
+              if_start = false;
               document.getElementById("countdown").innerHTML = "game ended.";
               $.getJSON($SCRIPT_ROOT + '/answer', {answers: JSON.stringify(answers.slice(0, img_urls.length))}, function(data) {
-                document.getElementById("countdown").innerHTML = "Your final score is " + data.score + "/100, thank you! (If you want to continue the game, please refresh the page)";
+                document.getElementById("countdown").innerHTML = "Your final score is " + data.score + "/100, thank you! (If you want to start a new game, please refresh the page; if not, please click (log out))";
               });
               // $.getJSON($SCRIPT_ROOT + '/img_url', {answer: 3}, {});
           }}, 1400);
       }
+
       let images_preload = async function() {
         for (i = 0; i < img_urls.length; i++) {
           await tmp.addImageProcess(img_urls[i]);
         }
-        document.getElementById("countdown").innerHTML = "All images are downloaded!"
-      }
-      images_preload();
-      document.body.onkeyup = function(e){
-        if (e.keyCode==83){
-          document.getElementById("countdown").innerHTML = "The game will start when images downloading finish.";
-          game_start();
+        document.getElementById("countdown").innerHTML = "All images are downloaded! Press <kbd>Space</kbd> to start the game. "
+        document.body.onkeyup = function(e){
+          if (e.keyCode==32){
+            if(if_start==false) game_start();
+          }
+          if (e.keyCode==72){
+            modal.style.display = "block";
+          }
+          if (e.keyCode==76){
+            document.getElementById("board").innerHTML = board[0];
+          }
         }
+      }
+      document.body.onkeyup = function(e){
         if (e.keyCode==27){
+          if_start = false;
+          clearInterval(y);
           document.getElementById("countdown").innerHTML = "Restarting game...";
           // $.getJSON($SCRIPT_ROOT + '/img_url', {answer: 2}, {});
           answers = new Array(img_urls.length).fill(0);
           image_count = 0;
-          game_start();
+          if(if_start==false) game_start();
+        }
+
+        if (e.keyCode==72){
+          modal.style.display = "block";
+        }
+        if (e.keyCode==76){
+          document.getElementById("board").innerHTML = board[0];
         }
       }
+
+      images_preload();
+
     </script>

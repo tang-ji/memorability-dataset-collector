@@ -24,6 +24,11 @@ class server:
         self.user_data_path = os.path.join(self.database_path, username)
         if not os.path.exists(self.user_data_path):
             os.makedirs(self.user_data_path)
+            if not os.path.exists("log"):
+                os.makedirs("log")
+            with open(os.path.join("log", "login.txt"), 'a+') as f:
+                f.write(time.strftime("[%Y-%m-%d %H:%M:%S] ", time.localtime()))
+                f.write("[{}] New user.\n".format(self.username))
         self.load()
 
     def save(self):
@@ -43,9 +48,6 @@ class server:
         try:
             [self.evaluations, self.scores, self.marks] = pickle.load(open(os.path.join(self.user_data_path, "data.pkl"), 'rb'))
         except:
-            with open("log.txt", 'a+') as f:
-                f.write(time.strftime("[%Y-%m-%d %H:%M:%S] ", time.localtime()))
-                f.write("[{}] New user.\n".format(server_class[session['username']].username))
             self.evaluations = []
             self.scores = []
             self.marks = set()
@@ -86,7 +88,19 @@ class server:
         else:
             score_max = max(self.scores)
         return("Hi {}, you have already marked {} images. Your highest score is {}/100.".format(self.username, len(self.marks), score_max))           
-               
+
+def return_highest_score(data_path):
+    data = glob(os.path.join(data_path, "*/data.pkl"))
+    user, score = "", 0
+    for d in data:
+        user_name = d.split(os.path.sep)[-2]
+        [_, scores, _] = pickle.load(open(d, 'rb'))
+        score_m = max(scores)
+        if score_m > score:
+            user = user_name
+            score = score_m
+    return user, score
+
 @app.route('/')
 def home():
     if not session.get('logged_in'):
@@ -95,17 +109,18 @@ def home():
         server_class[session['username']].load()
         labels = list(server_class[session['username']].get_all())
         labels.append(server_class[session['username']].welcome())
-        return render_template('test.html', labels=labels)
+        user_h, score_h = return_highest_score("data")
+        return render_template('test.html', labels=labels, board=["best score: {}/100 by {}".format(score_h, user_h)])
 
 @app.route('/answer')
 def get_answer():
     answer = json.loads(request.args.get('answers'))
     s = score(server_class[session['username']].n_targets, server_class[session['username']].n_filler, server_class[session['username']].n_vigilence, server_class[session['username']].labels, answer)
     server_class[session['username']].scores.append(s)
-    server_class[session['username']].marks |= set(server_class[session['username']].get_all())
+    server_class[session['username']].marks |= set(server_class[session['username']].imgs)
     e = evaluation(server_class[session['username']].labels, answer)
     server_class[session['username']].evaluations.append([e["correct_filler"], e["correct_target"], e["correct_target_rep"], e["correct_vigilence"], e["correct_vigilence_rep"]])
-    with open("log.txt", 'a+') as f:
+    with open(os.path.join("log", "log.txt"), 'a+') as f:
         f.write(time.strftime("[%Y-%m-%d %H:%M:%S] ", time.localtime()))
         f.write("[{}] Score: {}. ".format(session['username'], s))
         f.write(return_result(server_class[session['username']].n_targets, server_class[session['username']].n_filler, server_class[session['username']].n_vigilence, server_class[session['username']].labels, answer))
@@ -119,12 +134,15 @@ def get_answer():
 
 @app.route('/login', methods=['POST'])
 def do_admin_login():
-    username = request.form['username'].lower()
+    username = ''.join(filter(str.isalpha, request.form['username'].lower()))
     server_class[username] = server("static/imgs")
     server_class[username].login(username)
     session['logged_in'] = True
     session['username'] = username
-    with open("log.txt", 'a+') as f:
+    print(username, session['username'])
+    if not os.path.exists("log"):
+        os.makedirs("log")
+    with open(os.path.join("log", "login.txt"), 'a+') as f:
         f.write(time.strftime("[%Y-%m-%d %H:%M:%S] ", time.localtime()))
         f.write("[{}] Log in.\n".format(server_class[session['username']].username))
     return home()   
@@ -132,7 +150,9 @@ def do_admin_login():
 @app.route("/logout", methods=['POST'])
 def logout():
     session['logged_in'] = False
-    with open("log.txt", 'a+') as f:
+    if not os.path.exists("log"):
+        os.makedirs("log")
+    with open(os.path.join("log", "login.txt"), 'a+') as f:
         f.write(time.strftime("[%Y-%m-%d %H:%M:%S] ", time.localtime()))
         f.write("[{}] Log out.\n".format(server_class[session['username']].username))
     server_class.pop(session['username'], None)
