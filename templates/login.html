@@ -6,38 +6,101 @@
 		<style type="text/css">
 			body{color:black}
 			.context{background: #ffe577;
-			position: absolute;
-			left: 0;
-			top:50%;
-			width: 100%;
-			height: 800px;
-			margin-top: -350px;
-			overflow: hidden;
+				position: absolute;
+				left: 0;
+				top:50%;
+				width: 100%;
+				height: 800px;
+				margin-top: -350px;
+				overflow: hidden;
+			}
+			.modal-header {
+		        padding: 4px 16px;
+		        background-color: #ffe8a7;
+		        color: black;
+		    }
+      		.modal-body {
+      			padding: 2px 16px;
+      			background-color: #ffffe0;
+      		}
+			.modal {
+				display: none; /* Hidden by default */
+				position: fixed; /* Stay in place */
+				z-index: 1; /* Sit on top */
+				left: 0;
+				top: 0;
+				width: 100%; /* Full width */
+				height: 100%; /* Full height */
+				overflow: auto; /* Enable scroll if needed */
+				background-color: rgb(0,0,0); /* Fallback color */
+				background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+			}
+			.modal-content {
+				position: left;
+				background-color: #fefefe;
+				margin: auto;
+				margin-top: 150px;
+				padding: 0;
+				border: 1px solid #888;
+				width: 50%;
+				box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
+				animation-name: animatetop;
+				animation-duration: 0.4s
+			}
+			/* Add Animation */
+			@keyframes animatetop {
+			from {top: -300px; opacity: 0}
+			to {top: 0; opacity: 1}
 			}
 			.container{
 				max-width: 600px;
 				height: 400px;
 				padding: 80px 0;
-				text-align: center;
+				/*text-align: center;*/
 				margin: 0 auto;
 			}
 			.container h1{
 				font-size: 40px;
-			    font-weight: 300;}
-				form{padding: 20px 0;}
-				form input{border: 1px solid #FFF;
-				width: 220px;
-				padding: 10px 15px;
-				display: block;
-				margin: 0 auto 10px auto;
-				border-radius: 30px;
-				font-size: 18px;
-				font-weight: 300;
+			    font-weight: 300;
+			    text-align: center;
+			}
+			form{
+				padding: 20px 0;
 				text-align: center;
+			}
+			form input{border: 1px solid #FFF;
+			width: 220px;
+			padding: 10px 15px;
+			display: block;
+			margin: 0 auto 10px auto;
+			border-radius: 30px;
+			font-size: 18px;
+			font-weight: 300;
+			text-align: center;
 			}
 			.container h2{
 		        font-size: 16px;
 		        font-weight: 150;
+		        font-family: consolas;
+		        text-align: center;
+		    }
+		    .container h3{
+		        font-size: 18px;
+		        font-weight: 150;
+		        font-family: consolas;
+		        text-align: center;
+		    }
+		    .container l2{
+		        font-size: 18px;
+		        font-weight: 150;
+		        text-align: center;
+		        font-family: Courier;
+		        white-space: pre;
+		    }
+		    .container l1{
+		        font-size: 28px;
+		        font-weight: 300;
+		        text-align: center;
 		        font-family: consolas;
 		    }
 			form button{
@@ -48,9 +111,36 @@
 				border-radius: 8px;
 				width: 250px;
 				font-size: 16px;
+				align: center;
 			}
 			form button:hover{
 			 	background:#CCC;
+			}
+			kbd {
+				background-color: #eee;
+				border-radius: 3px;
+				border: 1px solid #b4b4b4;
+				box-shadow: 0 1px 1px rgba(0,0,0,.2), 0 2px 0 0 rgba(255,255,255,.7) inset;
+				color: #333;
+				display: inline-block;
+				font-family: consolas,"Liberation Mono",courier,monospace;
+				font-size: .85em;
+				font-weight: 700;
+				line-height: 1;
+				padding: 2px 4px;
+				white-space: nowrap;
+			}
+			.close {
+				color: #aaa;
+				float: right;
+				font-size: 28px;
+				font-weight: bold;
+			}
+			.close:hover,
+			.close:focus {
+				color: black;
+				text-decoration: none;
+				cursor: pointer;
 			}
 		
 		</style>
@@ -60,6 +150,17 @@
 		<form action="/login" method="POST">
 		<div class="context">
 			<div class="container">
+				<div id="myModal" class="modal">
+		            <div class="modal-content">
+						<div class="modal-header">
+							<span class="close">&times;</span>
+							<l1>Leaderboard</l1>
+						</div>
+						<div class="modal-body">
+							<label id="board"></label>
+						</div>
+		            </div>
+		        </div>
 				<h1><img src="static/logo_accenture.png" width="400"></h1>
 				<h1><p>Image Memory Game</p></h1>
 				<form action="" method="get">
@@ -67,7 +168,29 @@
 					<button type="submit">Start</button>		
 				</form>
 				<h2><p>Please make sure you use the same Nick Name for all the games.</p></h2>
+				<h2><p>Press <kbd>L</kbd> to see current leaderboard. </p></h2>
 			</div>
 		</div>	
 		</form>
 	</body>
+<script type=text/javascript>
+	$SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+	var modal = document.getElementById("myModal");
+	var span = document.getElementsByClassName("close")[0];
+	var board = {{board | tojson}};
+	document.getElementById("board").innerHTML = board;
+	// modal.style.display = "block";
+	span.onclick = function() {
+		modal.style.display = "none";
+	}
+	window.onclick = function(event) {
+		if (event.target == modal) {
+			modal.style.display = "none";
+		}
+	}
+	document.body.onkeyup = function(e){
+		if (e.keyCode==76){
+	    	modal.style.display = "block";
+	    }
+	}
+</script>

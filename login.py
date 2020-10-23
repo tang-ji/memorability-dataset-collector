@@ -89,28 +89,32 @@ class server:
             score_max = max(self.scores)
         return("Hi {}, you have already marked {} images. Your highest score is {}/100.".format(self.username, len(self.marks), score_max))           
 
-def return_highest_score(data_path):
+def return_highest_score(data_path, n):
     data = glob(os.path.join(data_path, "*/data.pkl"))
-    user, score = "", 0
+    l = []
     for d in data:
         user_name = d.split(os.path.sep)[-2]
         [_, scores, _] = pickle.load(open(d, 'rb'))
         score_m = max(scores)
-        if score_m > score:
-            user = user_name
-            score = score_m
-    return user, score
+        l.append([user_name, score_m])
+    return sorted(l, key=lambda x:-x[1])[:n]
+
+def score_html(score_list):
+    l = ""
+    for i, item in enumerate(score_list):
+        l+="<l2><p>{:>2}. {:<30s}{:>5.1f}</p></l2>".format(i+1, item[0], item[1])
+
+    return l
 
 @app.route('/')
 def home():
     if not session.get('logged_in'):
-        return render_template('login.html')
+        return render_template('login.html', board=score_html(return_highest_score("data", 3)))
     else:
         server_class[session['username']].load()
         labels = list(server_class[session['username']].get_all())
         labels.append(server_class[session['username']].welcome())
-        user_h, score_h = return_highest_score("data")
-        return render_template('test.html', labels=labels, board=["best score: {}/100 by {}".format(score_h, user_h)])
+        return render_template('test.html', labels=labels, board=score_html(return_highest_score("data", 3)))
 
 @app.route('/answer')
 def get_answer():
