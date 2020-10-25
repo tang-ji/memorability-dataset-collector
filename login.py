@@ -2,6 +2,7 @@ from flask import Flask, flash, redirect, render_template, request, session, abo
 import os, pickle, json, secrets, time
 from glob import glob
 from src.tool import *
+from src.nickname_generator import *
 
 app = Flask(__name__)
 
@@ -90,6 +91,10 @@ def return_highest_score(data_path, n):
         l.append([user_name, score_m])
     return sorted(l, key=lambda x:-x[1])[:n]
 
+def get_username_list(data_path):
+    data = glob(os.path.join(data_path, "*"))
+    return set([os.path.split(x)[1] for x in data])
+
 def score_html(score_list):
     l = ""
     for i, item in enumerate(score_list):
@@ -98,7 +103,7 @@ def score_html(score_list):
     return l
 
 def valide_letter(s):
-    if s.isalpha() or s.isdigit() or s == "_":
+    if s.isalpha() or s.isdigit() or s == " ":
         return True
     return False
 
@@ -111,6 +116,14 @@ def home():
         labels = list(server_class[session['username']].get_all())
         labels.append(server_class[session['username']].welcome())
         return render_template('game.html', labels=labels, board=score_html(return_highest_score("data", 3)))
+
+@app.route('/get_nickname')
+def get_nickname():
+    username_list = get_username_list("data")
+    name_generated = generate(min_length=8, max_length=15, items=[color, adjective, animal], p=[0.5, 0.5, 1])
+    while name_generated in username_list:
+        name_generated = generate(min_length=8, max_length=15, items=[color, adjective, animal], p=[0.5, 0.5, 1])
+    return jsonify(nickname=name_generated.lower())
 
 @app.route('/answer')
 def get_answer():
@@ -139,7 +152,6 @@ def do_admin_login():
     server_class[username].login(username)
     session['logged_in'] = True
     session['username'] = username
-    print(username, session['username'])
     if not os.path.exists("log"):
         os.makedirs("log")
     with open(os.path.join("log", "login.txt"), 'a+') as f:
