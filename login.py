@@ -1,7 +1,7 @@
 from flask import Flask, flash, redirect, render_template, request, session, abort, jsonify, make_response
 import os, pickle, json, secrets, time
 from glob import glob
-from data import *
+from src.tool import *
 
 app = Flask(__name__)
 
