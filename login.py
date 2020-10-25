@@ -65,20 +65,11 @@ class server:
 
         file_targets, file_filler, file_vigilence = get_files(self.imgs_file, self.marks, n_targets=self.n_targets, n_filler=self.n_filler, n_vigilence=self.n_vigilence)
         self.imgs, self.labels = get_sequence(file_targets, file_filler, file_vigilence) 
-
-        
-    # def get(self):
-    #     self.i += 1
-    #     if self.i >= len(self.imgs):
-    #         self.i = 0
-    #     return os.path.join(img_paths,self.imgs[self.i])
     def get_all(self):
         if debug:
             self.labels = [0]*10
             return [os.path.join(self.img_path,p) for p in self.imgs[:10]]
         return [os.path.join(self.img_path,p) for p in self.imgs[:self.n]]
-    # def last(self):
-    #     return self.imgs[self.i]
     def reset(self):
         self.load()
 
@@ -106,6 +97,11 @@ def score_html(score_list):
 
     return l
 
+def valide_letter(s):
+    if s.isalpha() or s.isdigit() or s == "_":
+        return True
+    return False
+
 @app.route('/')
 def home():
     if not session.get('logged_in'):
@@ -114,7 +110,7 @@ def home():
         server_class[session['username']].load()
         labels = list(server_class[session['username']].get_all())
         labels.append(server_class[session['username']].welcome())
-        return render_template('test.html', labels=labels, board=score_html(return_highest_score("data", 3)))
+        return render_template('game.html', labels=labels, board=score_html(return_highest_score("data", 3)))
 
 @app.route('/answer')
 def get_answer():
@@ -138,7 +134,7 @@ def get_answer():
 
 @app.route('/login', methods=['POST'])
 def do_admin_login():
-    username = ''.join(filter(str.isalpha, request.form['username'].lower()))
+    username = ''.join(filter(valide_letter, request.form['username'].lower()))
     server_class[username] = server("static/imgs")
     server_class[username].login(username)
     session['logged_in'] = True

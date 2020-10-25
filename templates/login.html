@@ -15,14 +15,14 @@
 				overflow: hidden;
 			}
 			.modal-header {
-		        padding: 4px 16px;
-		        background-color: #ffe8a7;
-		        color: black;
-		    }
-      		.modal-body {
-      			padding: 2px 16px;
-      			background-color: #ffffe0;
-      		}
+				padding: 4px 16px;
+				background-color: #ffe8a7;
+				color: black;
+			}
+			.modal-body {
+				padding: 2px 16px;
+				background-color: #ffffe0;
+			}
 			.modal {
 				display: none; /* Hidden by default */
 				position: fixed; /* Stay in place */
@@ -61,15 +61,15 @@
 			}
 			.container h1{
 				font-size: 40px;
-			    font-weight: 300;
-			    text-align: center;
+				font-weight: 300;
+				text-align: center;
 			}
 			form{
 				padding: 20px 0;
 				text-align: center;
 			}
 			form input{border: 1px solid #FFF;
-			width: 220px;
+			width: 250px;
 			padding: 10px 15px;
 			display: block;
 			margin: 0 auto 10px auto;
@@ -79,30 +79,30 @@
 			text-align: center;
 			}
 			.container h2{
-		        font-size: 16px;
-		        font-weight: 150;
-		        font-family: consolas;
-		        text-align: center;
-		    }
-		    .container h3{
-		        font-size: 18px;
-		        font-weight: 150;
-		        font-family: consolas;
-		        text-align: center;
-		    }
-		    .container l2{
-		        font-size: 18px;
-		        font-weight: 150;
-		        text-align: center;
-		        font-family: Courier;
-		        white-space: pre;
-		    }
-		    .container l1{
-		        font-size: 28px;
-		        font-weight: 300;
-		        text-align: center;
-		        font-family: consolas;
-		    }
+				font-size: 16px;
+				font-weight: 150;
+				font-family: consolas;
+				text-align: center;
+			}
+			.container h3{
+				font-size: 18px;
+				font-weight: 150;
+				font-family: consolas;
+				text-align: center;
+			}
+			.container l2{
+				font-size: 18px;
+				font-weight: 150;
+				text-align: center;
+				font-family: Courier;
+				white-space: pre;
+			}
+			.container l1{
+				font-size: 28px;
+				font-weight: 300;
+				text-align: center;
+				font-family: consolas;
+			}
 			form button{
 				background: black;
 				border: 0;
@@ -114,7 +114,7 @@
 				align: center;
 			}
 			form button:hover{
-			 	background:#CCC;
+				background:#CCC;
 			}
 			kbd {
 				background-color: #eee;
@@ -151,7 +151,7 @@
 		<div class="context">
 			<div class="container">
 				<div id="myModal" class="modal">
-		            <div class="modal-content">
+					<div class="modal-content">
 						<div class="modal-header">
 							<span class="close">&times;</span>
 							<l1>Leaderboard</l1>
@@ -159,15 +159,15 @@
 						<div class="modal-body">
 							<label id="board"></label>
 						</div>
-		            </div>
-		        </div>
-				<h1><img src="static/logo_accenture.png" width="400"></h1>
+					</div>
+				</div>
+				<img src="static/logo_accenture.png" width="400">
 				<h1><p>Image Memory Game</p></h1>
 				<form action="" method="get">
-					<input type="text"  name="username" placeholder="Nick Name"/>
-					<button type="submit">Start</button>		
+					<p><input type="text"  name="username" placeholder="Nick Name"/>
+					<button type="submit">Start</button></p>
 				</form>
-				<h2><p>Please make sure you use the same Nick Name for all the games.</p></h2>
+				<h2><p>Please keep your Nick Name for next games.</p></h2>
 				<h2><p>Press <kbd>L</kbd> to see current leaderboard. </p></h2>
 			</div>
 		</div>	
@@ -179,7 +179,6 @@
 	var span = document.getElementsByClassName("close")[0];
 	var board = {{board | tojson}};
 	document.getElementById("board").innerHTML = board;
-	// modal.style.display = "block";
 	span.onclick = function() {
 		modal.style.display = "none";
 	}
@@ -190,7 +189,7 @@
 	}
 	document.body.onkeyup = function(e){
 		if (e.keyCode==76){
-	    	modal.style.display = "block";
-	    }
+			modal.style.display = "block";
+		}
 	}
 </script>

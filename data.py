@@ -9,7 +9,7 @@ def get_files(imgs, marked, n_targets=66, n_filler=22, n_vigilence=12):
 def next_vig(available, i, max_vigilence):
     l = []
     for j in range(i+1, len(available)):
-        if available[j] - available[i] > 3:
+        if available[j] - available[i] > 2:
             if available[j] - available[i] <= max_vigilence:
                 l.append(j)
             else:
@@ -36,7 +36,7 @@ def set_target_reps(labels, files,file_targets, targets, target_gap):
         labels[target+this_gap] = 2
         files[target+this_gap] = file_targets[i]
 
-def get_sequence(file_targets, file_filler, file_vigilence, target_gap=80, max_vigilence=10):
+def get_sequence(file_targets, file_filler, file_vigilence, target_gap=80, max_vigilence=7):
     label_list = ["filler", "target", "target_rep", "vigilence", "vigilence_rep"]
     n_targets, n_filler, n_vigilence = len(file_targets), len(file_filler), len(file_vigilence)
     # shuffle
