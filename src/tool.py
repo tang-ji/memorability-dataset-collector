@@ -1,4 +1,6 @@
 import numpy as np
+import os, pickle
+from glob import glob
 
 def get_files(imgs, marked, n_targets=66, n_filler=22, n_vigilence=12):
     imgs_new = [img for img in imgs if img not in marked]
@@ -92,3 +94,29 @@ def return_result(n_targets, n_filler, n_vigilence, labels, answers):
     return("filler accuracy: {:.1f}%, target accuracy: {:.1f}%, vigilence accuracy: {:.1f}%".format(e['correct_filler']/n_filler*100, 
                                                                                                (e['correct_target']+e['correct_target_rep'])/(2*n_targets)*100, 
                                                                                                (e['correct_vigilence']+e['correct_vigilence_rep'])/(2*n_vigilence)*100))
+
+def return_highest_score(data_path, n):
+    data = glob(os.path.join(data_path, "*/data.pkl"))
+    l = []
+    for d in data:
+        user_name = d.split(os.path.sep)[-2]
+        [_, scores, _] = pickle.load(open(d, 'rb'))
+        score_m = max(scores)
+        l.append([user_name, score_m])
+    return sorted(l, key=lambda x:-x[1])[:n]
+
+def get_username_list(data_path):
+    data = glob(os.path.join(data_path, "*"))
+    return set([os.path.split(x)[1] for x in data])
+
+def score_html(score_list):
+    l = ""
+    for i, item in enumerate(score_list):
+        l+="<l2><p>{:>2}. {:<30s}{:>5.1f}</p></l2>".format(i+1, item[0], item[1])
+
+    return l
+
+def valide_letter(s):
+    if s.isalpha() or s.isdigit() or s == " ":
+        return True
+    return False

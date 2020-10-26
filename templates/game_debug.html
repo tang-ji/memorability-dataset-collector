@@ -185,6 +185,7 @@
 	var span = document.getElementsByClassName("close")[0];
 	var labels = {{labels | tojson}};
 	var board = {{board | tojson}};
+	var debugs = {{debugs | tojson}};
 	var img_urls = labels.slice(0, labels.length-1);
 	var welcome = labels[labels.length-1];
 	document.getElementById("welcome").innerHTML = welcome;
@@ -228,7 +229,7 @@
 				document.getElementById('image').src = img_urls[image_count];
 				document.getElementById('progress').value = image_count+1;
 				document.getElementById("progree_count").innerHTML = "Image remained: " + (img_urls.length-1 - image_count);
-				
+				document.getElementById("countdown").innerHTML = debugs[image_count];
 				document.body.onkeyup = function(e){
 					modal.style.display = "none";
 					if(e.keyCode == 32){
