@@ -40,7 +40,7 @@ class Server:
 
         with open(os.path.join(self.user_data_path, "labels.txt"), 'w') as f:
             for k, v in self.dataset.items():
-                f.write("{} {}\n".format(k, v))
+                f.write("{},{}\n".format(k, v))
 
         if self.debug:
             with open(os.path.join(self.user_data_path, "debug.pkl"), 'wb') as f:
@@ -70,10 +70,9 @@ class Server:
             with open(os.path.join(self.user_data_path, "labels.txt"), 'r') as f:
                 ls = f.readlines()
                 for l in ls:
-                    file_name, label = l.strip().split(" ")
+                    file_name, label = l.strip().split(",")
                     self.dataset[file_name] = label
         except:
-            self.dataset = {}
             pass
 
         file_targets, file_filler, file_vigilence = get_files(self.imgs_file, self.marks, n_targets=self.n_targets, n_filler=self.n_filler, n_vigilence=self.n_vigilence)
@@ -90,4 +89,4 @@ class Server:
             score_max = 0
         else:
             score_max = max(self.scores)
-        return("Hi {}, you have already marked {} images. Your highest score is {}/100.".format(self.username, len(self.marks), score_max))           
+        return("Hi {}, you have played {} games. Your highest score is {}/100.".format(self.username, len(self.scores), score_max))           

@@ -124,12 +124,17 @@
 			form button:hover{
 				background:#CCC;
 			}
-			select {
+			.select {
+				position: relative;
 				width: 80%;
-				padding: 16px 20px;
-				border: none;
-				border-radius: 4px;
+				padding: 8px 14px;
+				margin: 1em;
+				max-width: 200px;
+				/*border: none;*/
+				border-radius: 6px;
+				width: calc(80% - 5em);
 				background-color: #f1f1f1;
+				align-items: right;
 			}
 			kbd {
 				background-color: #eee;
@@ -195,27 +200,51 @@
 								<l1>Login</l1>
 							</div>
 							<div class="modal-body">
-								<h2>Hi <label id="username"></label>, welcome. Can I ask you some questions?</h2>
-								<h3>(You can change your nickname all the time)</h3>
+								<h3><label id="welcome"></label></h3>
+								<h3>(If it's not you, please change another nickname)</h3>
 								<div id="new_user">
-									<p>Sex:
+									<div id="question_sex"><h2>Sex:
 										<select id="sex" name="sex">
-										<option value="au">M.</option>
-										<option value="ca">F.</option>
-										<option value="usa">I don't want to reply</option>
-										</select>
-									</p>
-									<p>Age:
+										<option value="M">M.</option>
+										<option value="F">F.</option>
+										<option value="Other">Other</option>
+										<option value="None">I don't want to reply</option>
+										</select></h2>
+									</div>
+									<div id="question_age"><h2>Age:
 										<select id="age" name="age">
-										<option value="au"><20</option>
-										<option value="ca">20-30</option>
-										<option value="usa">30-40</option>
-										<option value="usa">40-50</option>
-										<option value="usa">50-60</option>
-										<option value="usa">>60</option>
-										<option value="usa">I don't want to reply</option>
-										</select>
-									</p>
+										<option value="<20"><20</option>
+										<option value="20-30">20-30</option>
+										<option value="30-40">30-40</option>
+										<option value="40-50">40-50</option>
+										<option value="50-60">50-60</option>
+										<option value=">60">>60</option>
+										<option value="None">I don't want to reply</option>
+										</select></h2>
+									</div>
+									<div id="question_job"><h2>Job:
+										<select id="job" name="job">
+										<option value="Engineering">Engineering</option>
+										<option value="Finance">Finance</option>
+										<option value="Healthcare">Healthcare</option>
+										<option value="Hospitality">Hospitality</option>
+										<option value="Technology">Technology</option>
+										<option value="Transportation">Transportation</option>
+										<option value="Other">Other</option>
+										<option value="None">I don't want to reply</option>
+										</select></h2>
+									</div>
+									<div id="question_ethnic"><h2>Location:
+										<select id="ethnic" name="ethnic">
+										<option value="Africa">Africa</option>
+										<option value="Asia">Asia</option>
+										<option value="Europe">Europe</option>
+										<option value="North America">North America</option>
+										<option value="South America">South America</option>
+										<option value="Oceania">Oceania</option>
+										<option value="None">I don't want to reply</option>
+										</select></h2>
+									</div>
 								</div>
 								<h3>Please keep your nickname in mind if you want to play more.</h3>
 								<form action="" method="get">
@@ -270,19 +299,31 @@
 	var board = {{board | tojson}};
 	document.getElementById("board").innerHTML = board;
 	document.getElementById("start").style.background = "#CCC";
-	document.getElementById("close_board").onclick = function() {
+	document.getElementById("new_user").style.visibility = "hidden";
+	document.getElementById("new_user").style.height = "8px";
 
+	document.getElementById("close_board").onclick = function() {
 		model_leaderboard.style.display = "none";
 	}
 	document.getElementById("close_login").onclick = function() {
-
 		model_login.style.display = "none";
 	}
 	document.getElementById("start").onclick = function() {
 		if (document.getElementById("nickname").value.length > 1 && document.getElementById("nickname").value.length < 20) {
 			model_leaderboard.style.display = "none";
-			document.getElementById("username").innerHTML = document.getElementById("nickname").value;
+			$.getJSON($SCRIPT_ROOT + '/get_info', {username: document.getElementById("nickname").value}, function(data){
+				document.getElementById("welcome").innerHTML = data.info["welcome"];
+				if (data.info["no_info"]) {
+					document.getElementById("new_user").style.visibility = "visible";
+					document.getElementById("new_user").style.height = "auto";
+				}
+				else {
+					document.getElementById("new_user").style.visibility = "hidden";
+					document.getElementById("new_user").style.height = "8px";
+				}
+			});
 			model_login.style.display = "block";
+			document.getElementById("submit").focus();
 		}
 	}
 
@@ -311,7 +352,17 @@
 		// Enter button
 		if (e.keyCode==13 && document.getElementById("nickname").value.length > 1 && document.getElementById("nickname").value.length < 20){
 			model_leaderboard.style.display = "none";
-			document.getElementById("username").innerHTML = document.getElementById("nickname").value;
+			$.getJSON($SCRIPT_ROOT + '/get_info', {username: document.getElementById("nickname").value}, function(data){
+				document.getElementById("welcome").innerHTML = data.info["welcome"];
+				if (data.info["no_info"]) {
+					document.getElementById("new_user").style.visibility = "visible";
+					document.getElementById("new_user").style.height = "auto";
+				}
+				else {
+					document.getElementById("new_user").style.visibility = "hidden";
+					document.getElementById("new_user").style.height = "8px";
+				}
+			});
 			model_login.style.display = "block";
 			document.getElementById("submit").focus();
 		}
