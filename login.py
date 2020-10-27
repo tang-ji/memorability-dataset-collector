@@ -26,11 +26,16 @@ def get_nickname():
         name_generated = generate(min_length=8, max_length=15, items=[color, adjective, animal], p=[0.5, 0.5, 1])
     return jsonify(nickname=name_generated.lower())
 
+@app.route('/get_info')
+def get_info():
+    answer = json.loads(request.args.get('nickname'))
+
+
+
 @app.route('/answer')
 def get_answer():
     answer = json.loads(request.args.get('answers'))
-    if debug:
-        server_class[session['username']].log = answer
+    server_class[session['username']].log = answer
     s = score(server_class[session['username']].n_targets, server_class[session['username']].n_filler, server_class[session['username']].n_vigilence, server_class[session['username']].labels, answer)
     server_class[session['username']].scores.append(s)
     server_class[session['username']].marks |= set(server_class[session['username']].imgs)
@@ -46,6 +51,7 @@ def get_answer():
         if server_class[session['username']].labels[i] == 2:
             server_class[session['username']].dataset[server_class[session['username']].imgs[i]] = answer[i]
     server_class[session['username']].save()
+    server_class[session['username']].save_game()
     return jsonify(score=s)
 
 @app.route('/login', methods=['POST'])

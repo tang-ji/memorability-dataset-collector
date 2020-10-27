@@ -46,6 +46,15 @@ class Server:
             with open(os.path.join(self.user_data_path, "debug.pkl"), 'wb') as f:
                 pickle.dump([self.imgs, self.labels, self.log], f)
 
+    def save_game(self):
+        if not os.path.exists(self.user_data_path):
+            os.makedirs(self.user_data_path)
+
+        with open(os.path.join(self.user_data_path, time.strftime("game%Y%m%d%H%M.txt", time.localtime())), 'w') as f:
+            f.write(",".join(self.imgs)+"\n")
+            f.write(",".join([str(int(label)) for label in self.labels])+"\n")
+            f.write(",".join([str(int(label)) for label in self.log]))
+
     def load(self):
         if not os.path.exists(self.user_data_path):
             os.makedirs(self.user_data_path)
@@ -69,8 +78,10 @@ class Server:
 
         file_targets, file_filler, file_vigilence = get_files(self.imgs_file, self.marks, n_targets=self.n_targets, n_filler=self.n_filler, n_vigilence=self.n_vigilence)
         self.imgs, self.labels = get_sequence(file_targets, file_filler, file_vigilence) 
+
     def get_all(self):
         return [os.path.join(self.img_path,p) for p in self.imgs[:self.n]]
+
     def reset(self):
         self.load()
 

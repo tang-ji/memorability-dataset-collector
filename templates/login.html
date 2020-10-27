@@ -54,7 +54,7 @@
 				position: left;
 				background-color: #fefefe;
 				margin: auto;
-				margin-top: 150px;
+				margin-top: 100px;
 				padding: 0;
 				border: 1px solid #888;
 				width: 50%;
@@ -99,9 +99,9 @@
 				text-align: center;
 			}
 			.container l2{
-				font-size: 28px;
-				font-weight: 150;
 				text-align: center;
+				font-weight: 200;
+				font-size: 1.05em;
 				font-family: Courier;
 				white-space: pre;
 			}
@@ -172,6 +172,7 @@
 							</div>
 							<div class="modal-body">
 								<label id="board"></label>
+								<p></p><p></p>
 							</div>
 						</div>
 					</div>
@@ -184,7 +185,6 @@
 								<span class="input__label-content input__label-content--ichiro">Nickname</span>
 							</label>
 						</span>
-						<!-- <p><input id="nickname" type="text" name="username" placeholder="Nickname" onkeypress="return event.keyCode != 13;"/> -->
 						<h2>Press <kbd>N</kbd> to generate a random Nickname. </h2>
 						<button type="button" id="start">Start</button>
 						<h3>Press <kbd>L</kbd> to see current leaderboard. </h3>
@@ -217,7 +217,7 @@
 										</select>
 									</p>
 								</div>
-								<h2>Please keep your nickname in mind if you want to play more.</h2>
+								<h3>Please keep your nickname in mind if you want to play more.</h3>
 								<form action="" method="get">
 								<button id="submit">Confirm</button></p>
 								</form>	
@@ -308,6 +308,7 @@
 		}
 		else document.getElementById("start").style.background = "#CCC";
 
+		// Enter button
 		if (e.keyCode==13 && document.getElementById("nickname").value.length > 1 && document.getElementById("nickname").value.length < 20){
 			model_leaderboard.style.display = "none";
 			document.getElementById("username").innerHTML = document.getElementById("nickname").value;
