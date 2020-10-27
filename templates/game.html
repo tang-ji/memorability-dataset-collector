@@ -11,19 +11,24 @@
 				text-align: center;
 			}
 			form button{
-				background: black;
+				background: #404d5b;
 				border: 0;
 				padding: 5px 10px;
 				color: white;
-				border-radius: 8px;
+				border-radius: 10px;
 				width: 70px;
 				font-size: 14px;
 			}
 			form button:hover{
 				background:#CCC;
 			}
-			body{
-				color:black; text-align: center; background: #ffe577;
+			body {
+				background: #f9f7f6;
+				color: #404d5b;
+				margin: auto;
+				font-weight: 200;
+				font-size: 1.05em;
+				font-family: 'Raleway', Arial, sans-serif;
 			}
 			.context{
 				position: center;
@@ -35,19 +40,13 @@
 				overflow: hidden;
 			}
 			.modal-header {
-				padding: 2px 16px;
-				background-color: #ffe8a7;
+				padding: 4px 16px;
+				background-color: #aaa;
 				color: black;
 			}
 			.modal-body {
 				padding: 2px 16px;
-				background-color: #ffffe0;
-			}
-			/* Modal Footer */
-			.modal-footer {
-				padding: 2px 16px;
-				background-color: #ffe8a7;
-				color: white;
+				background-color: #f9f7f6;
 			}
 			.modal {
 				display: none; /* Hidden by default */
@@ -62,9 +61,10 @@
 				background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
 			}
 			.modal-content {
-				position: relative;
+				position: left;
 				background-color: #fefefe;
 				margin: auto;
+				margin-top: 20px;
 				padding: 0;
 				border: 1px solid #888;
 				width: 50%;
@@ -224,8 +224,8 @@
 		var y = setInterval(function() {
 			image_count++;
 			if(image_count < img_urls.length) {
-				document.body.style.backgroundColor = "#ffe577";
 				document.getElementById('image').src = img_urls[image_count];
+				document.getElementById('image').style.opacity = 1.0;
 				document.getElementById('progress').value = image_count+1;
 				document.getElementById("progree_count").innerHTML = "Image remained: " + (img_urls.length-1 - image_count);
 				
@@ -233,7 +233,7 @@
 					modal.style.display = "none";
 					if(e.keyCode == 32){
 						answers[image_count] = 1;
-						document.body.style.backgroundColor = "#ffe8a7";
+						document.getElementById('image').style.opacity = 0.7;
 					}
 					if (e.keyCode==27){
 						if_start = false;
