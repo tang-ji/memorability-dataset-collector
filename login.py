@@ -8,6 +8,8 @@ app = Flask(__name__)
 
 @app.route('/')
 def home():
+    if 'logged_in' not in session:
+        session['logged_in'] = False
     if not session.get('logged_in'):
         return render_template('login.html', board=score_html(return_highest_score("data", 3)))
     else:
@@ -87,8 +89,10 @@ def get_answer():
     server_class[session['username']].save_game()
     return jsonify(score=s)
 
-@app.route('/login', methods=['POST'])
+@app.route('/login', methods=['POST', 'GET'])
 def do_admin_login():
+    if 'logged_in' not in session or session['logged_in'] == True:
+        return home()
     username = ''.join(filter(valide_letter, request.form['username'].lower()))
     server_class[username] = Server("static/imgs", debug=debug)
     server_class[username].login(username)
@@ -113,8 +117,10 @@ def do_admin_login():
         f.write("[{}] Log in.\n".format(server_class[session['username']].username))
     return home()   
 
-@app.route("/logout", methods=['POST'])
+@app.route("/logout", methods=['POST', 'GET'])
 def logout():
+    if not session.get('logged_in'):
+        return home()
     session['logged_in'] = False
     if not os.path.exists("log"):
         os.makedirs("log")
