@@ -39,7 +39,6 @@ def get_info():
     user_data_path = os.path.join("data", username)
     no_info = False
     if not os.path.exists(user_data_path):
-        os.makedirs(user_data_path)
         no_info = True
     try:
         [_, scores, marks] = pickle.load(open(os.path.join(user_data_path, "data.pkl"), 'rb'))
