@@ -1,14 +1,4 @@
 @import url(https://fonts.googleapis.com/css?family=Lato);
-body #card-body {
-	display: flex;
-	height: 20vh;
-	margin: auto;
-	margin-top: -20px;
-	justify-content: center;
-	align-items: center;
-	font-family: Lato, sans-serif;
-	background: #333;
-}
 .card-container {
 	width: 900px;
 	height: auto;
@@ -22,6 +12,7 @@ body #card-body {
 .card-container .card {
 	text-align: center;
 	margin: 0.2em auto;
+	cursor: pointer;
 }
 .card-container .card .card-img-top {
 	position: relative;
@@ -48,8 +39,8 @@ body #card-body {
 	border-radius: 5%;
 }
 .card-container .card .card-body .card-title {
-	margin: 0 0 0.75em 0;
-	font-size: 1.0em;
+	margin: 1.25em 0;
+	font-size: 1.8em;
 	font-weight: bold;
 	line-height: 1.2;
 }
@@ -57,23 +48,11 @@ body #card-body {
 	margin: 0 0 1em 0;
 }
 
-.card-container .card .card-body .btn {
-	padding: 0.375em 0.75em;
-	color: black;
-	text-decoration: none;
-	line-height: 1.5;
-	border: 1px solid black;
-	border-radius: 0.25em;
-	transition: 0.5s;
+.card-container .card:hover .card-img-top, .card-container .card.active .card-img-top {
+	transform: translateY(40%);
 }
-.card-container .card .card-body .btn:hover {
-	color: white;
-	background: black;
-}
-
-.card-container .card:hover .card-img-top {
-	transform: translateY(8%);
-}
-.card-container .card:hover .card-body {
+.card-container .card:hover .card-body, .card-container .card.active .card-body {
 	transform: translateY(0);
+	background: #404d5b;
+	color: white;
 }

@@ -9,49 +9,36 @@
 		<link rel="stylesheet" type="text/css" href="static/css/login.css" />
 		<link rel="stylesheet" type="text/css" href="static/css/card.css" />
 	</head>
-	<body id="card-body">
-		
-	</body>
 	<body>
-		<div class="card-container">
-		    <div class="card">
-		        <img src="static/sun_dataset.jpg" alt="sun" class="card-img-top">
+		<div id="cards" class="card-container">
+		    <div class="card" alt="1">
+		        <img src="static/sun_dataset.jpg" alt="Variety Images" class="card-img-top">
 		        <div class="card-body">
-		            <h5 class="card-title">SUN dataset</h5>
-		            <p class="card-text"></p>
-		            <button id="c1" class="btn">Select</button>
+		            <h5 class="card-title">Variety</h5>
 		        </div>
 		    </div>
-		    <div class="card">
-		        <img src="static/websites.png" alt="web" class="card-img-top">
+		    <div class="card" alt="2">
+		        <img src="static/websites.png" alt="Webpages" class="card-img-top">
 		        <div class="card-body">
 		            <h5 class="card-title">Webpages</h5>
-		            <p class="card-text"></p>
-		            <button id="c2" class="btn">Select</button>
 		        </div>
 		    </div>
-		    <div class="card">
-		        <img src="static/websites_blur.png" alt="web_blur" class="card-img-top">
+		    <div class="card" alt="3">
+		        <img src="static/websites_blur.png" alt="Blured Webpages" class="card-img-top">
 		        <div class="card-body">
-		            <h5 class="card-title">Blured Webpages</h5>
-		            <p class="card-text"></p>
-		            <button id="c3" class="btn">Select</button>
+		            <h5 class="card-title" style="font-size:1.05em; margin: 2.55em 0;">Webpages blured</h5>
 		        </div>
 		    </div>
-		    <div class="card">
-		        <img src="static/poster.jpg" alt="ads" class="card-img-top">
+		    <div class="card" alt="4">
+		        <img src="static/poster.jpg" alt="Ads" class="card-img-top">
 		        <div class="card-body">
-		            <h5 class="card-title">Ads dataset</h5>
-		            <p class="card-text"></p>
-		            <button id="c4" class="btn">Select</button>
+		            <h5 class="card-title">Ads</h5>
 		        </div>
 		    </div>
-		    <div class="card">
-		        <img src="static/amazon.jpg" alt="amazon" class="card-img-top">
+		    <div class="card" alt="5">
+		        <img src="static/amazon.jpg" alt="Amazon Products" class="card-img-top">
 		        <div class="card-body">
-		            <h5 class="card-title">Product dataset</h5>
-		            <p class="card-text"></p>
-		            <button id="c5" class="btn">Select</button>
+		            <h5 class="card-title">Products</h5>
 		        </div>
 		    </div>
 		</div>
@@ -190,6 +177,8 @@
 	document.getElementById("start").style.background = "#CCC";
 	document.getElementById("new_user").style.visibility = "hidden";
 	document.getElementById("new_user").style.height = "8px";
+	// Set default dataset
+	document.getElementsByClassName("card")[0].classList.add("active");
 
 	document.getElementById("close_board").onclick = function() {
 		model_leaderboard.style.display = "none";
@@ -197,24 +186,39 @@
 	document.getElementById("close_login").onclick = function() {
 		model_login.style.display = "none";
 	}
+
+	let get_info = function() {
+		model_leaderboard.style.display = "none";
+		$.getJSON($SCRIPT_ROOT + '/get_info', {username: document.getElementById("nickname").value, dataset: document.querySelectorAll(".active")[0].getAttribute("alt")}, function(data){
+			document.getElementById("welcome").innerHTML = data.info["welcome"];
+			if (data.info["no_info"]) {
+				document.getElementById("new_user").style.visibility = "visible";
+				document.getElementById("new_user").style.height = "auto";
+			}
+			else {
+				document.getElementById("new_user").style.visibility = "hidden";
+				document.getElementById("new_user").style.height = "8px";
+			}
+		});
+		model_login.style.display = "block";
+		document.getElementById("submit").focus();
+	}
+	;
 	document.getElementById("start").onclick = function() {
 		if (document.getElementById("nickname").value.length > 1 && document.getElementById("nickname").value.length < 20) {
-			model_leaderboard.style.display = "none";
-			$.getJSON($SCRIPT_ROOT + '/get_info', {username: document.getElementById("nickname").value}, function(data){
-				document.getElementById("welcome").innerHTML = data.info["welcome"];
-				if (data.info["no_info"]) {
-					document.getElementById("new_user").style.visibility = "visible";
-					document.getElementById("new_user").style.height = "auto";
-				}
-				else {
-					document.getElementById("new_user").style.visibility = "hidden";
-					document.getElementById("new_user").style.height = "8px";
-				}
-			});
-			model_login.style.display = "block";
-			document.getElementById("submit").focus();
+			get_info();
 		}
-	}
+	};
+
+	$('#cards div').click(function () {
+		var a = $(this);
+		[].slice.call(document.querySelectorAll(".active")).forEach(function(element) {
+			if(element !== a) {
+				element.classList.remove('active');
+			}
+		});
+		a.addClass('active');
+	});
 
 	let mouse_on_input = false;
 	window.onclick = function(event) {
@@ -240,20 +244,7 @@
 
 		// Enter button
 		if (e.keyCode==13 && document.getElementById("nickname").value.length > 1 && document.getElementById("nickname").value.length < 20){
-			model_leaderboard.style.display = "none";
-			$.getJSON($SCRIPT_ROOT + '/get_info', {username: document.getElementById("nickname").value}, function(data){
-				document.getElementById("welcome").innerHTML = data.info["welcome"];
-				if (data.info["no_info"]) {
-					document.getElementById("new_user").style.visibility = "visible";
-					document.getElementById("new_user").style.height = "auto";
-				}
-				else {
-					document.getElementById("new_user").style.visibility = "hidden";
-					document.getElementById("new_user").style.height = "8px";
-				}
-			});
-			model_login.style.display = "block";
-			document.getElementById("submit").focus();
+			get_info();
 		}
 		if (e.keyCode==76 && !mouse_on_input){
 			model_login.style.display = "none";

@@ -36,6 +36,7 @@ def get_nickname():
 @app.route('/get_info')
 def get_info():
     username = ''.join(filter(valide_letter, request.args.get('username', "", type=str).lower()))
+    dataset = request.args.get('dataset', "", type=str)
     user_data_path = os.path.join("data", username)
     no_info = False
     if not os.path.exists(user_data_path):
