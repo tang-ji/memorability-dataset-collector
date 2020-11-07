@@ -95,26 +95,31 @@ def return_result(n_targets, n_filler, n_vigilence, labels, answers):
                                                                                                (e['correct_target']+e['correct_target_rep'])/(2*n_targets)*100, 
                                                                                                (e['correct_vigilence']+e['correct_vigilence_rep'])/(2*n_vigilence)*100))
 
-def return_highest_score(data_path, n):
-    data = glob(os.path.join(data_path, "*/data.pkl"))
-    l = []
-    for d in data:
-        user_name = d.split(os.path.sep)[-2]
-        [_, scores, _] = pickle.load(open(d, 'rb'))
-        score_m = max(scores)
-        l.append([user_name, score_m])
-    return sorted(l, key=lambda x:-x[1])[:n]
+def return_highest_score(data_path, dataset_list, n):
+    scores_dict = {}
+    for dataset in dataset_list:
+        data = glob(os.path.join(data_path, "*/{}/data.pkl".format(dataset)))
+        l = []
+        for d in data:
+            user_name = d.split(os.path.sep)[-3]
+            [_, scores, _] = pickle.load(open(d, 'rb'))
+            score_m = max(scores)
+            l.append([user_name, score_m])
+        scores_dict[dataset] = sorted(l, key=lambda x:-x[1])[:n]
+    return scores_dict
 
 def get_username_list(data_path):
     data = glob(os.path.join(data_path, "*"))
     return set([os.path.split(x)[1] for x in data])
 
-def score_html(score_list):
-    l = ""
-    for i, item in enumerate(score_list):
-        l+="<l2><p>{:>2}. {:<30s}{:>5.1f}</p></l2>".format(i+1, item[0], item[1])
-
-    return l
+def score_html(score_dict):
+    html_dict = {}
+    for e, v in score_dict.items():
+        l = ""
+        for i, item in enumerate(v):
+            l+="<l2><p>{:>2}. {:<30s}{:>5.1f}</p></l2>".format(i+1, item[0], item[1])
+        html_dict[e] = l
+    return html_dict
 
 def valide_letter(s):
     if s.isalpha() or s.isdigit() or s == " ":

@@ -10,15 +10,16 @@ app = Flask(__name__)
 def home():
     if 'logged_in' not in session:
         session['logged_in'] = False
+    html_list = score_html(return_highest_score("data", dataset_list, 3))
     if not session.get('logged_in'):
-        return render_template('login.html', board=score_html(return_highest_score("data", 3)))
+        return render_template('login.html', board=html_list)
     else:
         server_class[session['username']].load()
         labels = list(server_class[session['username']].get_all())
         labels.append(server_class[session['username']].welcome())
         if debug:
-            return render_template('game_debug.html', labels=labels, board=score_html(return_highest_score("data", 3)), debugs=list(server_class[session['username']].labels))
-        return render_template('game.html', labels=labels, board=score_html(return_highest_score("data", 3)))
+            return render_template('game_debug.html', labels=labels, board=html_list[session['dataset_name']], debugs=list(server_class[session['username']].labels))
+        return render_template('game.html', labels=labels, board=html_list[session['dataset_name']])
 
 @app.route('/get_nickname')
 def get_nickname():
@@ -36,10 +37,12 @@ def get_nickname():
 @app.route('/get_info')
 def get_info():
     username = ''.join(filter(valide_letter, request.args.get('username', "", type=str).lower()))
-    dataset = request.args.get('dataset', "", type=str)
-    user_data_path = os.path.join("data", username)
+    dataset_name = request.args.get('dataset', "", type=str)
+    session['dataset_name'] = dataset_name
+    user_info_path = os.path.join("data", username)
+    user_data_path = os.path.join(user_info_path, dataset_name)
     no_info = False
-    if not os.path.exists(user_data_path):
+    if not os.path.exists(user_info_path):
         no_info = True
     try:
         [_, scores, marks] = pickle.load(open(os.path.join(user_data_path, "data.pkl"), 'rb'))
@@ -53,7 +56,7 @@ def get_info():
         pass
     try:
         info = {}
-        with open(os.path.join(user_data_path, "info.txt"), 'r') as f:
+        with open(os.path.join(user_info_path, "info.txt"), 'r') as f:
             ls = f.readlines()
             for l in ls:
                 field, label = l.strip().split(",")
@@ -61,7 +64,7 @@ def get_info():
     except:
         no_info = True
         pass
-    info["welcome"] = "Hi {}, you have played {} games, your highest score is {}/100.".format(username, len(scores), max_scores)
+    info["welcome"] = "Hi {}, you have played {} games based on {} dataset, your highest score is {}/100.".format(username, len(scores), dataset_name, max_scores)
     info["no_info"] = no_info
     session["no_info"] = no_info
     return jsonify(info=info)
@@ -94,7 +97,7 @@ def do_admin_login():
     if 'logged_in' not in session or session['logged_in'] == True:
         return home()
     username = ''.join(filter(valide_letter, request.form['username'].lower()))
-    server_class[username] = Server("static/imgs", debug=debug)
+    server_class[username] = Server(session['dataset_name'], debug=debug)
     server_class[username].login(username)
     if session["no_info"]:
         info = request.form.to_dict(flat=True)
@@ -114,7 +117,7 @@ def do_admin_login():
         os.makedirs("log")
     with open(os.path.join("log", "login.txt"), 'a+') as f:
         f.write(time.strftime("[%Y-%m-%d %H:%M:%S] ", time.localtime()))
-        f.write("[{}] Log in.\n".format(server_class[session['username']].username))
+        f.write("[{}][{}] Log in.\n".format(server_class[session['username']].username, server_class[session['username']].dataset_name))
     return home()   
 
 @app.route("/logout", methods=['POST', 'GET'])
@@ -135,5 +138,6 @@ def logout():
 if __name__ == "__main__":
     debug = False
     server_class = {}
+    dataset_list = ["SUN", "Webpages", "Webpages_blured", "Posters", "Products"]
     app.secret_key = os.urandom(12)
     app.run(host='0.0.0.0', port=5000)

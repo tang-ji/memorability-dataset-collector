@@ -3,11 +3,13 @@ from glob import glob
 from src.tool import *
 
 class Server:
-    def __init__(self, img_path, database_path="data", n_targets=66, n_filler=44, n_vigilence=12, debug=False):
+    def __init__(self, dataset_name, database_path="data", n_targets=66, n_filler=44, n_vigilence=12, debug=False):
         self.n_targets = n_targets
         self.n_filler = n_filler
         self.n_vigilence = n_vigilence
         self.n = n_targets*2 + n_filler + n_vigilence*2
+        self.dataset_name = dataset_name
+        img_path = os.path.join("static/dataset", dataset_name)
         self.img_path = img_path
         self.database_path = database_path
         self.debug = debug
@@ -21,14 +23,9 @@ class Server:
         
     def login(self, username):
         self.username = username
-        self.user_data_path = os.path.join(self.database_path, username)
+        self.user_data_path = os.path.join(os.path.join(self.database_path, username), self.dataset_name)
         if not os.path.exists(self.user_data_path):
             os.makedirs(self.user_data_path)
-            if not os.path.exists("log"):
-                os.makedirs("log")
-            with open(os.path.join("log", "login.txt"), 'a+') as f:
-                f.write(time.strftime("[%Y-%m-%d %H:%M:%S] ", time.localtime()))
-                f.write("[{}] New user.\n".format(self.username))
         self.load()
 
     def save(self):
@@ -89,4 +86,5 @@ class Server:
             score_max = 0
         else:
             score_max = max(self.scores)
-        return("Hi {}, you have played {} games. Your highest score is {}/100.".format(self.username, len(self.scores), score_max))           
+
+        return("Hi {}, you have played {} games based on {} dataset. Your highest score is {}/100.".format(self.username, len(self.scores), self.dataset_name, score_max))           

@@ -11,32 +11,32 @@
 	</head>
 	<body>
 		<div id="cards" class="card-container">
-		    <div class="card" alt="1">
+		    <div class="card" alt="SUN">
 		        <img src="static/sun_dataset.jpg" alt="Variety Images" class="card-img-top">
 		        <div class="card-body">
 		            <h5 class="card-title">Variety</h5>
 		        </div>
 		    </div>
-		    <div class="card" alt="2">
+		    <div class="card" alt="Webpages">
 		        <img src="static/websites.png" alt="Webpages" class="card-img-top">
 		        <div class="card-body">
 		            <h5 class="card-title">Webpages</h5>
 		        </div>
 		    </div>
-		    <div class="card" alt="3">
+		    <div class="card" alt="Webpages_blured">
 		        <img src="static/websites_blur.png" alt="Blured Webpages" class="card-img-top">
 		        <div class="card-body">
 		            <h5 class="card-title" style="font-size:1.05em; margin: 2.55em 0;">Webpages blured</h5>
 		        </div>
 		    </div>
-		    <div class="card" alt="4">
-		        <img src="static/poster.jpg" alt="Ads" class="card-img-top">
+		    <div class="card" alt="Posters">
+		        <img src="static/poster.jpg" alt="Posters" class="card-img-top">
 		        <div class="card-body">
 		            <h5 class="card-title">Ads</h5>
 		        </div>
 		    </div>
-		    <div class="card" alt="5">
-		        <img src="static/amazon.jpg" alt="Amazon Products" class="card-img-top">
+		    <div class="card" alt="Products">
+		        <img src="static/amazon.jpg" alt="Products" class="card-img-top">
 		        <div class="card-body">
 		            <h5 class="card-title">Products</h5>
 		        </div>
@@ -49,7 +49,7 @@
 					<div class="modal-content">
 						<div class="modal-header">
 							<span id="close_board" class="close">&times;</span>
-							<l1>Leaderboard</l1>
+							<l1>Leaderboard <label id="leaderboard_dataset"></label></l1>
 						</div>
 						<div class="modal-body">
 							<label id="board"></label>
@@ -68,7 +68,7 @@
 					</span>
 					<h2>Press <kbd>N</kbd> to generate a random Nickname. </h2>
 					<button type="button" id="start">Start</button>
-					<h3>Press <kbd>L</kbd> to see current leaderboard. </h3>
+					<h3>Change the dataset at the top of page. Press <kbd>L</kbd> to see leaderboard.</h3>
 				<div id="model_login" class="modal">
 					<div class="modal-content">
 						<div class="modal-header">
@@ -173,12 +173,13 @@
 	var model_login = document.getElementById("model_login");
 	var span = document.getElementsByClassName("close")[0];
 	var board = {{board | tojson}};
-	document.getElementById("board").innerHTML = board;
 	document.getElementById("start").style.background = "#CCC";
 	document.getElementById("new_user").style.visibility = "hidden";
 	document.getElementById("new_user").style.height = "8px";
 	// Set default dataset
 	document.getElementsByClassName("card")[0].classList.add("active");
+	document.getElementById("board").innerHTML = board[document.querySelectorAll(".active")[0].getAttribute("alt")];
+	document.getElementById("leaderboard_dataset").innerHTML = "on "+document.querySelectorAll(".active")[0].getAttribute("alt")+" dataset";
 
 	document.getElementById("close_board").onclick = function() {
 		model_leaderboard.style.display = "none";
@@ -248,6 +249,8 @@
 		}
 		if (e.keyCode==76 && !mouse_on_input){
 			model_login.style.display = "none";
+			document.getElementById("leaderboard_dataset").innerHTML = "on "+document.querySelectorAll(".active")[0].getAttribute("alt")+" dataset";
+			document.getElementById("board").innerHTML = board[document.querySelectorAll(".active")[0].getAttribute("alt")];
 			model_leaderboard.style.display = "block";
 		}
 		if (e.keyCode==78 && !mouse_on_input){

@@ -51,7 +51,10 @@
 .card-container .card:hover .card-img-top, .card-container .card.active .card-img-top {
 	transform: translateY(40%);
 }
-.card-container .card:hover .card-body, .card-container .card.active .card-body {
+.card-container .card:hover .card-body{
+	transform: translateY(0);
+}
+.card-container .card.active .card-body {
 	transform: translateY(0);
 	background: #404d5b;
 	color: white;
