@@ -81,7 +81,12 @@ def get_answer():
     server_class[session['username']].evaluations.append([e["correct_filler"], e["correct_target"], e["correct_target_rep"], e["correct_vigilence"], e["correct_vigilence_rep"]])
     with open(os.path.join("log", "log.txt"), 'a+') as f:
         f.write(time.strftime("[%Y-%m-%d %H:%M:%S] ", time.localtime()))
-        f.write("[{}] Score: {}. ".format(session['username'], s))
+        f.write("[{}] [{}] Score: {}. ".format(session['username'], session['dataset_name'], s))
+        f.write(return_result(server_class[session['username']].n_targets, server_class[session['username']].n_filler, server_class[session['username']].n_vigilence, server_class[session['username']].labels, answer))
+        f.write("\n")
+    with open(os.path.join("data/{}".format(session['username']), "log.txt"), 'a+') as f:
+        f.write(time.strftime("[%Y-%m-%d %H:%M:%S] ", time.localtime()))
+        f.write("[{}] [{}] Score: {}. ".format(session['username'], session['dataset_name'], s))
         f.write(return_result(server_class[session['username']].n_targets, server_class[session['username']].n_filler, server_class[session['username']].n_vigilence, server_class[session['username']].labels, answer))
         f.write("\n")
 
@@ -117,7 +122,7 @@ def do_admin_login():
         os.makedirs("log")
     with open(os.path.join("log", "login.txt"), 'a+') as f:
         f.write(time.strftime("[%Y-%m-%d %H:%M:%S] ", time.localtime()))
-        f.write("[{}][{}] Log in.\n".format(server_class[session['username']].username, server_class[session['username']].dataset_name))
+        f.write("[{}] [{}] Log in.\n".format(server_class[session['username']].username, server_class[session['username']].dataset_name))
     return home()   
 
 @app.route("/logout", methods=['POST', 'GET'])
@@ -136,7 +141,7 @@ def logout():
 
 
 if __name__ == "__main__":
-    debug = False
+    debug = True
     server_class = {}
     dataset_list = ["SUN", "Webpages", "Webpages_blured", "Posters", "Products"]
     app.secret_key = os.urandom(12)
