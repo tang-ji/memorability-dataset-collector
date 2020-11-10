@@ -1,6 +1,8 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
 dataset/
+imgs/
+imgs_com/
 data/
 *.txt
 *.pkl
