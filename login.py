@@ -102,27 +102,34 @@ def do_admin_login():
     if 'logged_in' not in session or session['logged_in'] == True:
         return home()
     username = ''.join(filter(valide_letter, request.form['username'].lower()))
-    server_class[username] = Server(session['dataset_name'], debug=debug)
-    server_class[username].login(username)
-    if session["no_info"]:
-        info = request.form.to_dict(flat=True)
+    try:
+        server_class[username] = Server(session['dataset_name'], debug=debug)
+        server_class[username].login(username)
+        if session["no_info"]:
+            info = request.form.to_dict(flat=True)
+            if not os.path.exists("log"):
+                os.makedirs("log")
+            with open(os.path.join("log", "login.txt"), 'a+') as f_log:
+                f_log.write(time.strftime("[%Y-%m-%d %H:%M:%S] ", time.localtime()))
+                f_log.write("[{}] New user info: ".format(username))
+                with open(os.path.join(os.path.join("data", username), "info.txt"), 'w') as f:
+                    for k, v in info.items():
+                        f.write("{},{}\n".format(k, v))
+                        f_log.write("{}: {}; ".format(k, v))
+                f_log.write("\n")
+        session['logged_in'] = True
+        session['username'] = username
         if not os.path.exists("log"):
             os.makedirs("log")
-        with open(os.path.join("log", "login.txt"), 'a+') as f_log:
-            f_log.write(time.strftime("[%Y-%m-%d %H:%M:%S] ", time.localtime()))
-            f_log.write("[{}] New user info: ".format(username))
-            with open(os.path.join(os.path.join("data", username), "info.txt"), 'w') as f:
-                for k, v in info.items():
-                    f.write("{},{}\n".format(k, v))
-                    f_log.write("{}: {}; ".format(k, v))
-            f_log.write("\n")
-    session['logged_in'] = True
-    session['username'] = username
-    if not os.path.exists("log"):
-        os.makedirs("log")
-    with open(os.path.join("log", "login.txt"), 'a+') as f:
-        f.write(time.strftime("[%Y-%m-%d %H:%M:%S] ", time.localtime()))
-        f.write("[{}] [{}] Log in.\n".format(server_class[session['username']].username, server_class[session['username']].dataset_name))
+        with open(os.path.join("log", "login.txt"), 'a+') as f:
+            f.write(time.strftime("[%Y-%m-%d %H:%M:%S] ", time.localtime()))
+            f.write("[{}] [{}] Log in.\n".format(server_class[session['username']].username, server_class[session['username']].dataset_name))
+    except:
+        if not os.path.exists("log"):
+            os.makedirs("log")
+        with open(os.path.join("log", "login.txt"), 'a+') as f:
+            f.write(time.strftime("[%Y-%m-%d %H:%M:%S] ", time.localtime()))
+            f.write("[{}] [{}] Login failed.\n".format(username, server_class[username].dataset_name))
     return home()   
 
 @app.route("/logout", methods=['POST', 'GET'])
@@ -143,6 +150,6 @@ def logout():
 if __name__ == "__main__":
     debug = True
     server_class = {}
-    dataset_list = ["SUN", "Webpages", "Webpages_blured", "Posters", "Products"]
+    dataset_list = ["SUN", "Webpages", "Webpages_blured", "Posters", "Products", "Posts"]
     app.secret_key = os.urandom(12)
     app.run(host='0.0.0.0', port=5000)
