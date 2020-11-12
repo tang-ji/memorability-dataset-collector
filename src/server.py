@@ -17,7 +17,7 @@ class Server:
             self.log = []
         if not os.path.exists(database_path):
             os.makedirs(database_path)
-        self.imgs_file = [os.path.split(p)[1] for p in glob(os.path.join(img_path, "*.jpg"))]
+        self.imgs_file = [os.path.split(p)[1] for p in glob(os.path.join(img_path, "*.jpg"))] + [os.path.split(p)[1] for p in glob(os.path.join(img_path, "*.png"))]
 
         self.username = None
         
