@@ -10,6 +10,7 @@
 	margin: 0 auto;
 }
 .card-container .card {
+	z-index: 3;
 	text-align: center;
 	margin: 0.2em auto;
 	cursor: pointer;
@@ -25,7 +26,7 @@
 }
 
 .card-container .card .card-body {
-	z-index: 3;
+	/*z-index: 3;*/
 	box-sizing: border-box;
 	height: 110px;
 	background: #CCC;
