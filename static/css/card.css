@@ -16,7 +16,7 @@
 }
 .card-container .card .card-img-top {
 	position: relative;
-	z-index: 2;
+	z-index: 4;
 	width: 150px;
 	height: 115px;
 	transform: translateY(52%);
@@ -25,7 +25,7 @@
 }
 
 .card-container .card .card-body {
-	z-index: 1;
+	z-index: 3;
 	box-sizing: border-box;
 	height: 110px;
 	background: #CCC;

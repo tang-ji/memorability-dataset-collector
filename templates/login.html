@@ -228,6 +228,9 @@
 			}
 		});
 		a.addClass('active');
+		document.getElementById("leaderboard_dataset").innerHTML = "on "+document.querySelectorAll(".active")[0].getAttribute("alt")+" dataset";
+		document.getElementById("board").innerHTML = board[document.querySelectorAll(".active")[0].getAttribute("alt")];
+		if (model_login.style.display == "block") get_info();
 	});
 
 	let mouse_on_input = false;
@@ -258,8 +261,6 @@
 		}
 		if (e.keyCode==76 && !mouse_on_input){
 			model_login.style.display = "none";
-			document.getElementById("leaderboard_dataset").innerHTML = "on "+document.querySelectorAll(".active")[0].getAttribute("alt")+" dataset";
-			document.getElementById("board").innerHTML = board[document.querySelectorAll(".active")[0].getAttribute("alt")];
 			model_leaderboard.style.display = "block";
 		}
 		if (e.keyCode==78 && !mouse_on_input){
