@@ -49,7 +49,7 @@ from {top: -300px; opacity: 0}
 to {top: 0; opacity: 1}
 }
 .container{
-	max-width: 600px;
+	max-width: 1200px;
 	/*padding: -400px 0;*/
 	text-align: center;
 	margin: 0 auto;
